@@ -3,11 +3,11 @@
 # ----------------------- #
 
 url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+title: Abhijit Pradhan's blog
+subtitle: Thoughts and observations hacking in NYC
+author: Abhijit Pradhan
 simple_search: https://www.google.com/search
-description:
+description: A record of my time learning to code at the Flatiron School in NYC.
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
