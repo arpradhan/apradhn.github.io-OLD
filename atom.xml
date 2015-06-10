@@ -4,7 +4,7 @@
   <title><![CDATA[Abhijit Pradhan's blog]]></title>
   <link href="http://apradhn.github.io/atom.xml" rel="self"/>
   <link href="http://apradhn.github.io/"/>
-  <updated>2015-06-09T23:55:05-04:00</updated>
+  <updated>2015-06-10T00:07:37-04:00</updated>
   <id>http://apradhn.github.io/</id>
   <author>
     <name><![CDATA[Abhijit Pradhan]]></name>
@@ -98,6 +98,9 @@ animals.none?{|animal, properties| properties[:class] == &ldquo;reptilia&rdquo;}
 animals.one?{|animal, properties| properties[:class] == &ldquo;aves&rdquo;} #=> true
 </code></p>
 
+<h3>#partition</h3>
+
+
 <p><code>#partition</code> is even stranger, because it returns two arrays, one for which the expression in the block evaluates to true, and the other for false. Say I have an arrays of dinosaur hashes, I can use partition to split it into an array of Jurassic and Cretaceous dinosaurs: </p>
 
 
@@ -145,7 +148,8 @@ kaiju = [<br>
 &nbsp;&nbsp;{name: &ldquo;Destoroyah&rdquo;, year: 1995},<br>
 &nbsp;&nbsp;{name: &ldquo;Biollante&rdquo;, year: 1989},<br>
 &nbsp;&nbsp;{name: &ldquo;Gezora&rdquo;, year: 1971}<br>
-]<br> #=> [<br>
+]<br>
+kaiju.find_all {|k| k[:year] > 1965 &amp;&amp; k[:year] &lt; 1975 } #=> [<br>
 &nbsp;&nbsp;{:name=>&ldquo;Gigan&rdquo;, :year=>1972}, <br>
 &nbsp;&nbsp;{:name=>&ldquo;Mechagodzilla&rdquo;, :year=>1974}, <br>
 &nbsp;&nbsp;{:name=>&ldquo;Gezora&rdquo;, :year=>1971}<br>]
