@@ -65,7 +65,7 @@ animals.none?{|animal, properties| properties[:class] == "reptilia"} <br> #=> tr
 <code>
 animals.one?{|animal, properties| properties[:class] == "aves"} #=> true
 </code>
-
+<h3>#partition</h3>
 <p><code>#partition</code> is even stranger, because it returns two arrays, one for which the expression in the block evaluates to true, and the other for false. Say I have an arrays of dinosaur hashes, I can use partition to split it into an array of Jurassic and Cretaceous dinosaurs: </p>
 
 <code>
@@ -107,7 +107,8 @@ kaiju = [<br>
 &nbsp;&nbsp;{name: "Destoroyah", year: 1995},<br>
 &nbsp;&nbsp;{name: "Biollante", year: 1989},<br>
 &nbsp;&nbsp;{name: "Gezora", year: 1971}<br>
-]<br> #=> [<br>
+]<br> 
+kaiju.find_all {|k| k[:year] > 1965 && k[:year] < 1975 } #=> [<br>
 &nbsp;&nbsp;{:name=>"Gigan", :year=>1972}, <br>
 &nbsp;&nbsp;{:name=>"Mechagodzilla", :year=>1974}, <br>
 &nbsp;&nbsp;{:name=>"Gezora", :year=>1971}<br>]
