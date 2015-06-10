@@ -5,7 +5,6 @@ date: 2015-06-09 20:59:28 -0400
 comments: true
 categories: 
 ---
-Fun with enumerables
 
 <p>Over the last few days I've started experimenting with Enumerables. Nearly every lab required iterating through an array or hash in order to crunch some kind of data, so it made sense to use to utilize Ruby's built-in methods for Enumerble rather than push values to empty array inside an <code>#each</code> loop.</p>
 
