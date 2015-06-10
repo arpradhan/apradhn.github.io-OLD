@@ -23,7 +23,7 @@ holiday_hash
 holiday_hash[:winter].collect {|holiday, supplies| supplies << supply }
 </code>
 
-<p>Last week in the iteration lecture, Avi said something like "Every you want a return a new array that is identical in size to the array you are iterating through, you probably want to use #collect". Since then I've been trying to replace unnecessary #each loops with #collect and in the process found out about some pretty useful enumerables to quickly return data from an array or hash. I learned that #find, #any?, and #select are powerful enumerables for completing some of the most common processes you want to do with an array or hash. So I wanted to spend some time exploring the rest of the Enumerable catalog to see what else could help me get data from an array/hash</p>
+<p>Last week in the iteration lecture, Avi said something like "Every time you want a return a new array that is identical in size to the array you are iterating through, you probably want to use #collect". Since then I've been trying to replace unnecessary #each loops with #collect and in the process found out about some pretty useful enumerables to quickly return data from an array or hash. I learned that #find, #any?, and #select are powerful enumerables for completing some of the most common processes you want to do with an array or hash. So I wanted to spend some time exploring the rest of the Enumerable catalog to see what else could help me get data from an array/hash</p>
 
 <h3>#count</h3>
 
@@ -148,7 +148,7 @@ returns:
 &nbsp;&nbsp;{:name=>"PaRappa The Rapper", :console=>"Playstation"},<br>
 &nbsp;&nbsp;{:name=>"Tony Hawk's Pro Skater", :console=>"Playstation"}],<br>
 "Nintendo 64"=>[<br>
-&nbsp;&nbsp;{:name=>"Pokmon Snap", :console=>"Nintendo 64"},<br>
+&nbsp;&nbsp;{:name=>"Pokémon Snap", :console=>"Nintendo 64"},<br>
 &nbsp;&nbsp;{:name=>"Goldeneye", :console=>"Nintendo 64"}<br>
 ]}
 </code>
