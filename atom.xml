@@ -4,7 +4,7 @@
   <title><![CDATA[Abhijit Pradhan's blog]]></title>
   <link href="http://apradhn.github.io/atom.xml" rel="self"/>
   <link href="http://apradhn.github.io/"/>
-  <updated>2015-06-09T23:46:31-04:00</updated>
+  <updated>2015-06-09T23:52:48-04:00</updated>
   <id>http://apradhn.github.io/</id>
   <author>
     <name><![CDATA[Abhijit Pradhan]]></name>
@@ -198,15 +198,6 @@ games.group_by{|game| game[:console]}
 </code></p>
 
 <p>In conclusion, enumerables are powerful methods that allow you to extract the most likely data you want to get from an array or hash, if you know how to use them properly. Nearly all of them can be recreated with an #each loop, but enumerables can save numerous lines of code and consolidate the logic of your program. Enumerables seem like a shortcut, but you can end up in a lot of trouble if you don&rsquo;t know exactly what you&rsquo;re using them for. I&rsquo;m glad we reconstructed some of the enumerables in class last week so that I could get a better understanding of the more exotic enumerables available in Ruby.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[My First Post on Octopress]]></title>
-    <link href="http://apradhn.github.io/blog/2015/06/02/my-first-post-on-octopress/"/>
-    <updated>2015-06-02T12:24:16-04:00</updated>
-    <id>http://apradhn.github.io/blog/2015/06/02/my-first-post-on-octopress</id>
-    <content type="html"><![CDATA[<p>&ldquo;Hello, World&rdquo;</p>
 ]]></content>
   </entry>
   
