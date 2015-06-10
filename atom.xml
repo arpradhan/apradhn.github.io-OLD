@@ -4,7 +4,7 @@
   <title><![CDATA[Abhijit Pradhan's blog]]></title>
   <link href="http://apradhn.github.io/atom.xml" rel="self"/>
   <link href="http://apradhn.github.io/"/>
-  <updated>2015-06-10T00:07:37-04:00</updated>
+  <updated>2015-06-10T00:10:34-04:00</updated>
   <id>http://apradhn.github.io/</id>
   <author>
     <name><![CDATA[Abhijit Pradhan]]></name>
@@ -39,7 +39,7 @@ holiday_hash
 holiday_hash[:winter].collect {|holiday, supplies| supplies &lt;&lt; supply }
 </code></p>
 
-<p>Last week in the iteration lecture, Avi said something like "Every you want a return a new array that is identical in size to the array you are iterating through, you probably want to use #collect". Since then I've been trying to replace unnecessary #each loops with #collect and in the process found out about some pretty useful enumerables to quickly return data from an array or hash. I learned that #find, #any?, and #select are powerful enumerables for completing some of the most common processes you want to do with an array or hash. So I wanted to spend some time exploring the rest of the Enumerable catalog to see what else could help me get data from an array/hash</p>
+<p>Last week in the iteration lecture, Avi said something like "Every time you want a return a new array that is identical in size to the array you are iterating through, you probably want to use #collect". Since then I've been trying to replace unnecessary #each loops with #collect and in the process found out about some pretty useful enumerables to quickly return data from an array or hash. I learned that #find, #any?, and #select are powerful enumerables for completing some of the most common processes you want to do with an array or hash. So I wanted to spend some time exploring the rest of the Enumerable catalog to see what else could help me get data from an array/hash</p>
 
 
 
@@ -194,7 +194,7 @@ games.group_by{|game| game[:console]}
 &nbsp;&nbsp;{:name=>&ldquo;PaRappa The Rapper&rdquo;, :console=>&ldquo;Playstation&rdquo;},<br>
 &nbsp;&nbsp;{:name=>&ldquo;Tony Hawk&rsquo;s Pro Skater&rdquo;, :console=>&ldquo;Playstation&rdquo;}],<br>
 &ldquo;Nintendo 64&rdquo;=>[<br>
-&nbsp;&nbsp;{:name=>&ldquo;Pokmon Snap&rdquo;, :console=>&ldquo;Nintendo 64&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Pokémon Snap&rdquo;, :console=>&ldquo;Nintendo 64&rdquo;},<br>
 &nbsp;&nbsp;{:name=>&ldquo;Goldeneye&rdquo;, :console=>&ldquo;Nintendo 64&rdquo;}<br>
 ]}
 </code></p>
