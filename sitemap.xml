@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://apradhn.github.io/blog/2015/06/22/user-experience-lessons-from-metroid-prime/</loc>
+    <lastmod>2015-06-22T00:18:35-04:00</lastmod>
+  </url>
+  <url>
     <loc>http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/</loc>
     <lastmod>2015-06-09T20:59:28-04:00</lastmod>
   </url>
