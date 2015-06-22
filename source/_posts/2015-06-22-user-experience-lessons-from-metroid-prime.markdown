@@ -1,0 +1,31 @@
+---
+layout: post
+title: "Lessons in Software Design From Metroid Prime"
+date: 2015-06-22 00:18:35 -0400
+comments: true
+categories: 
+---
+
+Over the past few days at Flatiron, I've though a lot about how the video games I played as a kid has informed the way I think about designing software. Each week we've been introduced to a new concept, from loops, to object oriented design to databases, and it helped to digest those concepts by thinking about those concepts in in the form of video games. However, I think some older video still have a few lessons to teach to modern software design. In particular, Metroid Prime came to mind. 
+
+I grew up with a Sega Genesis so only recently have I been able to play some of the classic Super Nintendo games, particularly the games produced in-house by Nintendo. Games like Earthbound and Super Metroid struck me for their immersive user experiences. Thanks to Apple and Google, the average consumer has high standards for user experience compared to software products of the 80s and 90s. From my personal experience, using a computer in the 90s felt like a chore, like I was using something designed primarily to make spreadsheets. But despite the limited technology of the time, Nintendo was able to craft delightful software that could sustain your attention span for hours.
+
+Of all the games I've played recently however, Metroid Prime stood out as a game with exceptional trust in the user's ability to navigate a piece of software. For that reason, I wanted to spend some time thinking about what lessons we could learn from it to apply to software design. Caveat: I still haven't beaten this game, and it's kind of insane they expected a child to beat this thing without looking for help on the internet. 
+
+<<img src="http://static.giantbomb.com/uploads/original/0/2627/575576-metroid_map1.jpg" alt="">
+
+##Separation of Concerns
+Super Metroid puts you in control of an interplanetary bounty hunter, but little of it actually involves shooting stuff. Most of the time you guide Samus through the caverns of alien planet looking for new weapons or a boss battle. For a game that mostly involves running around, keeping the player's position in perspective poses a huge design challenge. Nintendo solves this problem by giving each of the five or so zones a unique look and feel. Moreover, each room of the game has a unique architecture. This is especially important for a game like Metroid Prime, that relies heaviy on exploration an puzzle solving. One of the factors that makes Metroid Prime a class is that there is no wasted pixel. There is no obstacle thoughtlessly placed, no ledge or secret passage way randomly programmed. It's easy to get lost in Metroid Prime, but not impossible to find your way out.
+
+<img src="http://resource.mmgn.com/Games/Wii/large/Super-Metroid-5.jpg" alt="">
+
+##Domain Modeling
+Solving puzzles in Super Metroid involves some variation on shooting or blowing things up. While this doesn't resemble a specific real-world analog, it does provide a meaningful design language. In this case, Nintendo exploits the very basic expectation between action and reaction. Very early on, you learn that Samus has to shoot doors with her blaster in order for them to open. Then you find out that green doors don't open when you shoot them. Expectation: you need to shoot them with something else. Eventually you find missles that do such a job. Later you find blocks engraved with symbols similar to the bombs you can drop. No surprise, you can blow them up with your bombs. Every interaction with the environment in Metroid Prime is meticulously planned. The lesson here is to provide meaningful feedback to every user interaction in your design. Don't mislead the user with flashy animations, make a deliberate choice for every possible way a user can interact with your product. 
+
+<img src="http://199.101.98.242/media/images/35792-Super_Metroid_(Europe)_(En,Fr,De)-10.jpg" alt="">
+
+##Know Thy User
+The big secret about Super Metroid is that it gets easier the more you play it. It's never as hard as when you first step outside the spaceship, nary a super bomb. Over time you accumulate weapons, and master the environment, learning the ins and outs of the game. It's not really a secret, as pretty much any game that implements character development uses this pattern, from Final Fantasy to Arkham City. The trick is balancing how you empower the user. Super Metroid draws the problem-solvers with a sci-fi leaning. They reward intelligence by giving Samus bigger and better weapons, and health bonuses. The boss battles are noteworthy too. Too many games of this era punish the user for simply getting to the end. But each boss in Super Metroid behaves with a clear pattern. Additionally, Super Metroid grants you just enough health points, and places save points close by, to give the user more opportunities to experiment with different strategies. Fighting the bosses in Super Metroid feels like learning, where other boss battles of the era simply reward fast reflexes, luck, and what pixel you happen to be standing on.Empower them too quickly, and they grow bored. Empower them too slow, and you lose their attention. Games like Temple Run and Flappy Bird may seem dumb to many, but they remain immensely popular because each time you fail, you feel that it was your fault. 
+
+##Conclusion
+The lesson for non-game apps is that you need to respect the intelligence and the attention span of your audience. Do not overload them with an abundance of choices to show off the nifty features of your app. Create a story that guides their eyeball to the necessary info. If you have a lot of features, make the user feel like they are discovering the app themselves. If your app is not a video game, no one is using your app because it's pretty, they want to get something out of it. Whether it's Google Maps, or Tinder the design of user experience works because they have an intimate understanding of their user base. To spec buffs, these details may seem unimportant, but its the small details that make that make software distinguish itself from copycats.
