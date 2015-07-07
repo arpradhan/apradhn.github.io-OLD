@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: School | Abhijit Pradhan's blog]]></title>
+  <link href="http://apradhn.github.io/blog/categories/school/atom.xml" rel="self"/>
+  <link href="http://apradhn.github.io/"/>
+  <updated>2015-07-07T01:59:46-04:00</updated>
+  <id>http://apradhn.github.io/</id>
+  <author>
+    <name><![CDATA[Abhijit Pradhan]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Kurt Vonnegut and Software Design]]></title>
+    <link href="http://apradhn.github.io/blog/2015/07/07/kurt-vonnegut-and-software-design/"/>
+    <updated>2015-07-07T01:00:31-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/07/07/kurt-vonnegut-and-software-design</id>
+    <content type="html"><![CDATA[<p>As an English major, I'm always trying to draw parallels between software design and literary criticism. Additionally, studying code everyday a Flatiron has pushed me to relate more abstract concepts to software design. Spurred by a reddit post about Kurt Vonnegut's "8 Basics of Creative Writing", I couldn't help but draw parallels between Vonnegut's rules and patterns of good software design. Kurt Vonnegut is a good writer to take software design inspiration from because his writing reflects a spare, concise style devoid of ornamentation. Addtionally, I've started reading <strong>Practical Object-Oriented Design in Ruby</strong> which discusses what it means for a software design pattern to be "good". What follows below is my best attempt to map Vonnegut's principles of writing to principles of good software design.</p>
+
+
+<ol>
+  <li><strong>Use the time of a total stranger in such a way that he or she will not feel the time was wasted</strong></li>
+  <br>
+  <p>To me, this rule says that no line of code of should be wasted. For example, does your method need to store local data, if it's purpose is to return that same data? All methods in ruby return the statement executed on the last line, so you do not always need to store data to a local variable in order to return it. If you do store data to a local variable, ensure that you do so for a reason. Otherwise, needlessly storing local data makes your code harder to read and harder to maintain.</p>
+  <li><strong>Give the reader at least one character he or she can root for.</strong></li>
+  <br>
+  <p>Okay, this is going to be a stretch, but I feel like this rule relates to the Single Responsibility Principle. The Single Responsibility Principle states that every class should have responsibility over a single part of the functionality of provided by the software. Not only does SRP make reading code easier, but it helps improves software by segmenting processes of a software into singular action. If one process breaks, you can quickly see where the error is happening, instead of having to read through the code of your entire application. It seems to me that any given method should ideally interact with one piece of data.</p>
+  <li><strong>Every character should want something, even if it is only a glass of water</strong></li>
+  <br>
+  <p>To me, this means that every method must return something useful, even if it's nil. The true potential of Object-Oriented Design only becomes unleashed if you assume that all methods of all classes return something to other objects. Even seemingly unimportant values like nil are important to return, because they tell us valuable information about the receiver. Returning nil is essential when our receiver is not compatible with the method called upon it, otherwise we may not catch the error until it pops up farther down pipeline.</p>
+  <li><strong>Every sentence must do one of two things--reveal character or advance action</strong></li>
+  <br>
+  <p>
+    This is the writing rule I saw on Reddit that prompted this post. This rule reinforces that there should be no unnecessary line of code, i.e. Do Not Repeat Yourself. The best code is code that can be built upon by future developers, for whatever they want to use your code for. Therefore, your code is actually telling a story to both the compiler and the human reading it. Every class must have a purpose for existing, and every method must have a necessary impact on the user experience. Anytime you write a method, you must ask yourself why must this be an instance method or class method? If more than one class share the same method, it's almost always a good idea to place it inside a module. Anyone reading your code will assume that you wrote everything for a particular reason, so you should think about how unused or unnecessary code obsfuscates meaning. Additionally, I feel that naming conventions for variables are just as important. Would the Great Gatsby have been as moving a novel if it were named the Satisfactory Gatsby? If i see a local variable in your code, the best way i can infer its purpose is from its name.
+  </p>
+  <li><strong>Start as Close to the End as Possible</strong></li>
+  <br>
+  <p>Agile Software Development is a collection of software development practices developed by Rubyists to enhance software deisgn patterns and productivity that has since been adopted by the tech-world at large. The first principle of Agile stresses delivering customer satisfaction through iterative development. What this means is that you should build your software bit by bit, developing the next most observable unit of progress. Our labs have a fairly straightforward linear progression, but in the real world, you cannot fathom what direction your software will grow into. By building an application incrementally, you get an organic sense of the how the final product should look and feel to the end-user, and it's easier for you diagnose and fix issues.</p>
+  <li><strong>Be a sadist. No Matter how sweet and innocent your leading characters, make awful things happen to them--in order to that the reader may see what they are made of.</strong></li>
+  <br>
+  <p>Okay, this is going to be another stretch. Write your classes with confidence. Write your classes in such a way that that they can smash into each other in unpredictable ways and yet yield no errors. Classes that are written in a flexible manner encourage experimentation, and thus encourage more creative software. Be willing to shift the focus of your application from one class to another, as the occaision sees fit.</p>
+  <li><strong>Write to please just one person. If you open a window and make love to the world, so to speak, your story will get pneumonia</strong></li>
+  <br>
+  <p>Write code that solves immediate problems. Do not write code that might possibly solve problems that do not exist yet. Code that is written to solve problems that does not exist discourages experimentation. Refactor your code for the problems that immediately present it.</p>
+  <li><strong>Give your readers as much information as possible as soon as possible. To heck with suspense. Readers should have such complete understanding of what is going on, where and why, that they could finish the story themselves, should cockaroaches eat the last few pages.</strong></li>
+  <br>
+  <p>When I read this rule, the first thing that leaps to mind is "Convention Over Configuration", one of the guiding principles behind Ruby on Rails. Your classes should have an interface that is easy for another developer to play around with. There's actually quite a bit of power behind this statement. Convention is like an implicit language between the lines of code that is readable only by humans. Computers do not require CRUD operations. We implement CRUD operations in software design because it is a familiar heurisitic for the most common interactions users have with data. Much of magic syntactical sugar of rails comes from this idea that there is a conventional way of building the basic elements of a web application. When developers share this understanding, it empowers us all to build bigger and more beautiful things, instead of wasting time explaining ourselves.</p>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>
