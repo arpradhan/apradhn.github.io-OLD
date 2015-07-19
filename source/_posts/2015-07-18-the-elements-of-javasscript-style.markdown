@@ -1,0 +1,190 @@
+---
+layout: post
+title: "The Elements of JavaScript Style"
+date: 2015-07-18 20:48:44 -0400
+comments: true
+categories: JavaScript
+---
+<p>This week we started learning JavaScript, and although it's a nifty language I can't help but miss Ruby. What I admired most about Ruby was the way it encouraged productivity by removing the need for repetitive syntax. Ruby also inspires the programmer to think about how their code looks. After 8 weeks of coding in Ruby I feel like i had developed a personal style with the language, and I'm struggling to develop a voice for JavaScript.</p>
+
+<p>
+  Adding a semi-colon to each line may seem like a small issue. But I feel that my creativity and productivity is limited by having to obey the strict syntax of the language. There are plenty of great guides on any given topic in JavaScript, but I wondered if there was some kind of style guide on JavaScript that would help me appreciate the language more. 
+</p>
+<img class="left" src="https://upload.wikimedia.org/wikipedia/en/2/22/Elements_of_Style_cover.jpg" alt="Elements of Style cover">
+<p>
+  If you've ever taken a writing class chances are you have some version of this book. In fact, i'm pretty sure I have a few. Written by William Strunk and E.B. White the book outlines several principles that promote concise, clear writing and also describes common pitfalls of poor writing to avoid. 
+  </p>
+
+<p>The book is so popular that many fields have their own "Elements of Style" type guide. There's even an "Elements of Programming Style" book. Published in the 70s, some parts of it are irrelevant to a modern audience. The programming languages used in the book include Fortran and PL/I, which do not really use Object Oriented Design. Additionally, some of the rules refer to coding practices that are totally outdated.
+</p>
+
+<blockquote>
+  15. Avoid gotos completely if you can keep the program readable.
+</blockquote>
+
+<p>
+  But most of the rules remain relevant to practically any programming language:
+</p>
+
+<blockquote>
+39. Make it right before you make it faster <br>
+40. Make it fail-safe before you make it faster.<br>
+41. Make it clear before you make it faster. <br>
+</blockquote>
+
+<p>
+  I wanted to find out if there was a style guide for JavaScript, so I Googled "JavaScript style guide". Interestingly, AirBnb's JavaScript style guide was the first search result.
+  Reading it definitely helped get a better appreciation for JavaScript's subtleties. Unfortunately, most the coolness like array spreads and passing blocks are brand new and do not have full browser support. Therefore, this blog post will focus on their es5 version of the guide.
+</p>
+
+<h3><a href="https://github.com/airbnb/javascript/tree/master/es5">airbnb/javascript (es5)</a></h3>
+
+<h4>Arrays</h4>
+
+<p>
+  Since JavaScript lacks many of the enumerables of Ruby I found myself copying arrays quite a bit. Creating a copy of an array usually involves some version of the for loop. However, you can simply use Array#slice to copy an array in one line of code: 
+</p>
+
+``` javascript
+var len = items.length;
+var itemsCopy = [];
+var i;
+
+// bad
+for (i = 0; i < len; i++) {
+  itemsCopy[i] = items[i];
+}
+
+// good
+itemsCopy = items.slice();
+```
+
+<p>You can also use Array#slice to convert an array-like object into an array</p>
+``` javascript
+function trigger() {
+  var args = Array.prototype.slice.call(arguments);
+  ...
+}
+```
+<p>This example creates an array from any arguments passed to the function. This allows you to recreate the splat operator from Ruby, so you can write a function that takes any number of arguments.</p>
+
+
+<h4>Strings</h4>
+
+<p>Compared to Ruby, string manipulation in JavaScript is pain in the ass. Therefore AirBnb has a few style rules to keep things in order, like using single quotes. They don't explain why, but I imagine it has to do with avoiding unecessary shift keying. Rubyists prefer double quotes because they are required for string interpolation, but since JavaScript doesn't have string interpolation anyways, double quotes are arbitrary. </p>
+
+<p>
+  Additionally, they advise concatenating strings longer than 80 characters. Doing so greatly aids the readability of the code.
+</p>
+
+<p>Since JavaScript lacks string interpolation, AirBnb recommend using Array#join to build strings programmtically. This is especially helpful when building html tags:</p>
+``` javascript
+function inbox(messages) {
+  items = [];
+
+  for (i = 0; i < length; i++) {
+    // use direct assignment in this case because we're micro-optimizing.
+    items[i] = '<li>' + messages[i].message + '</li>';
+  }
+
+  return '<ul>' + items.join('') + '</ul>';
+}
+```
+
+<h4>Functions</h4>
+<p>AirBnb advises against declaring functions in a non-function block, for example if statements and for loops. I don't really understand this one because I've never had the need to define a function within a loop or a conditional.</p>
+
+<h4>Properties</h4>
+<p>An object's property's can be accessed via dot-notation or subscript notation <code>[]</code>. Use dot-notation when accessing an object's properties, and use subscript notation when accessing accessing properties within a function. Subscript notation is useful in funcitons because you can acess an object's properties without knowing the name of the property.</p>
+
+<h4>Variables</h4>
+<p>AirBnb recommends using one <code>var</code> declaration per variable. This surprised me because I was using commas so i wouldn't have to keep keying <code>var</code>. But they argue that using one <code>var</code> per variable makes it easier to add new variable declarations. I see their point here, because I do remember it being a pain to add new variabeles to my comma separated list. The comma separated list implies that you know all the variables you're ever going to need when you start writing a function, and that just isn't the case.</p>
+<p>They also recommend declaring unassigned variables last, because it ensures that you will be able to assign the variable based on the values of the previously defined variables. Additionally, they recommend assigning variables at the top of their scope in order to reduce variable declaration and assignment hoisting issues. This is especially helpful for me because sometimes i need to use variables within loops, but I was confused about how they were scoped. declaring everything at the top ensures that all variables have the same scope, so you never have to consider their scope later on.</p>
+
+<h4>Comparison Operators and Equality</h4>
+<p>AirBnb offers some super helpful shorcuts for evaluating Boolean logic that I will definitely make a point of using. These shortcuts take advantage of the fact that you can pass a single variable to a conditional in JavaScript just like Ruby. For example if you want to check if a string is empty simply pass the string to the conditional, because an empty string <code>''</code> evaluates to false. You can also use this to check whether a collection is empty, since 0 evaluates to false:
+</p>
+``` javascript
+if (collection.length) {
+  // ...stuff...
+}
+```
+
+<h4>Blocks</h4>
+<p>One of the coolest tricks I learned was that you only need to use braces for multiline blocks. So if you have conditional that executes one line you can simply write:</p>
+``` javascript
+// good
+if (test) return false;
+```
+
+<h4>Commments</h4>
+<p>AirBnb recommened using multi-line comments to describe functions. One of the nice things about Ruby was that you didn't really need comments because it was so readable. Therefore, multiline comments allow the reader to quickly understand the purpose of your JavaScript functions.</p>
+``` javascript
+// good
+/**
+ * make() returns a new element
+ * based on the passed in tag name
+ *
+ * @param {String} tag
+ * @return {Element} element
+ */
+function make(tag) {
+
+  // ...stuff...
+
+  return element;
+}
+```
+
+<h4>Whitespace</h4>
+<p>Chaining methods is a common practice in JavaScript, but long method chains are difficult to read and keep track of. Therefore, you should start a new line leading with the dot of the method call.</p>
+``` javascript
+var leds = stage.selectAll('.led')
+    .data(data)
+  .enter().append('svg:svg')
+    .classed('led', true)
+    .attr('width', (radius + margin) * 2)
+  .append('svg:g')
+    .attr('transform', 'translate(' + (radius + margin) + ',' + (radius + margin) + ')')
+    .call(tron.led);
+```
+
+<h4>Commas</h4>
+<p>I noticed that in some of the labs, objects are written with trailing commas, which caused me some confusion. While it's tempting to use trailing commas in order to make it easier to add properties, this actually throws an error for  IE6/7 and IE9 if it's in quirksmode. At Flatiron, we probably don't need to worry about that case, but I personally refer to leave them off for style sake.</p>
+
+<h4>Type Casting  &amp; Coercion</h4>
+<p>Controlling type can be annoying in JavaScript so I was pleased to learn a few tricks to help reduce errors. For example if you want to turn a number into a string:</p>
+``` javascript
+var totalScore = '' + this.reviewScore;
+```
+<p>#parseInt() is the most popular way of converting a string into a number, but you can also use Number();</p>
+```
+var val = Number(inputValue);
+```
+<p>I've never used the second argument of parseInt(), as I don't really understand what a radix is. However, AirBnb recommends specifying the radix in order to reduce possible errors. From what I can glean, the radix is basically the key for how JavaScript should interpret the string. In most cases, it looks like 10 is the radix you want to use. The Mozilla dev guide has a good example of why specifiying the radix helps to reduce errors. For example, the following lines all evaluate to 15;</p>
+``` javascript
+parseInt("15*3", 10);
+parseInt("15e2", 10);
+parseInt("15px", 10);
+```
+<p>This allows you to pass strings with non-numeric characters without throwing an error.</p>
+
+<p>For typecasting boolean values, the guide recommends using Boolean() and !!. So if you want a variable that stores the truth value of another variable you can simply write:</p>
+``` javascript
+// good
+var hasAge = Boolean(age);
+
+// good
+var hasAge = !!age;
+```
+
+<h4>Naming Conventions</h4>
+<p>In lab review, we briefly discussed ways to store this as a local variable and "that" and "self" were mentioned as possibilties. AirBnb advises against this practices, and instead recommends name the local variable <code>_this</code>. I prefer this method because it reduces ambiguity and the underscore denotes that it acts like a private property.</p>
+
+<h4>Constructors</h4>
+<p>
+  In order to design objects that can use method chains, AirBnb recommends that object methods return <code>this</code>. This is helpful because you can only chain methods on the object itself.
+</p>
+
+<h4>Conclusion</h4>
+<p>Reading AirBnb's JavaScript style guide definitely helped me ease some of my anxiety about the language. I wish some of their rules were explained, but overall it's quite informative. My biggest takeaway is that even though JavaScript's scope is weird, you can implement some basic conventions to avoid unforeseen errors down the road. I would definitely recommend new JavaScripters to take a look at the guide, as I personally plan on keeping it bookmarked to so I can rely on it later.</p>

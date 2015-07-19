@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Lessons in Software Design From Metroid Prime"
+title: "Lessons in Software Design From Super Metroid"
 date: 2015-06-22 00:18:35 -0400
 comments: true
 categories: 
