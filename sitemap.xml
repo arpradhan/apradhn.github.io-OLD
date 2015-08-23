@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/</loc>
+    <lastmod>2015-08-22T18:50:04-04:00</lastmod>
+  </url>
+  <url>
     <loc>http://apradhn.github.io/blog/2015/07/18/the-elements-of-javasscript-style/</loc>
     <lastmod>2015-07-18T20:48:44-04:00</lastmod>
   </url>
@@ -17,10 +21,29 @@
     <lastmod>2015-06-09T20:59:28-04:00</lastmod>
   </url>
   <url>
+    <loc>http://apradhn.github.io/blog/2011/06/01/this-is-a-test/</loc>
+    <lastmod>2011-06-01T14:44:00-04:00</lastmod>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/archives/</loc>
+  </url>
+  <url>
     <loc>http://apradhn.github.io/blog/archives/</loc>
   </url>
   <url>
+    <loc>http://apradhn.github.io/blog/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/projects/</loc>
+  </url>
+  <url>
     <loc>http://apradhn.github.io/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/about/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/awesome-sauce/</loc>
   </url>
   <url>
     <loc>http://apradhn.github.io/blog/categories/flatiron/</loc>
@@ -30,5 +53,23 @@
   </url>
   <url>
     <loc>http://apradhn.github.io/blog/categories/javascript/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/rails/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/javascript/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/ruby/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/sidekiq/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/pusher/</loc>
+  </url>
+  <url>
+    <loc>http://apradhn.github.io/blog/categories/ajax/</loc>
   </url>
 </urlset>

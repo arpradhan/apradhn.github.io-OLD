@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Flatiron | Abhijit Pradhan's blog]]></title>
+  <title><![CDATA[Category: flatiron | Abhijit Pradhan]]></title>
   <link href="http://apradhn.github.io/blog/categories/flatiron/atom.xml" rel="self"/>
   <link href="http://apradhn.github.io/"/>
-  <updated>2015-07-22T11:55:59-04:00</updated>
+  <updated>2015-08-22T22:50:43-04:00</updated>
   <id>http://apradhn.github.io/</id>
   <author>
     <name><![CDATA[Abhijit Pradhan]]></name>
     
   </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+  <generator uri="http://ryandeussing.com/">Ryan Deussing</generator>
 
   
   <entry>

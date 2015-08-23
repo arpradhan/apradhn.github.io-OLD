@@ -5,65 +5,84 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Fun With Enumerables - Abhijit Pradhan's blog</title>
   <meta name="author" content="Abhijit Pradhan">
+  <meta name="description" content="Abhijit Pradhan">
+
+  
+    <title>Fun With Enumerables - Abhijit Pradhan</title>
+  
+
 
   
   <meta name="description" content="Over the last few days I've started experimenting with Enumerables. Nearly every lab required iterating through an array or hash in order to crunch &hellip;">
   
 
+
+
+  <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
   <link rel="canonical" href="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables">
-  <link href="/favicon.png" rel="icon">
+  <link href="/favicon.ico" rel="icon">
+  <script type="text/javascript" src="http://use.typekit.com/zcp2xbp.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>  
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Abhijit Pradhan's blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Abhijit Pradhan" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.useso.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.useso.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
 
 </head>
 
-<body   >
-  <div id="sidebar_control"></div>
-  <div id="sidebar">
-    <div class="logo">
-      .krnl
-    </div>
-    <div class="content hide">
-      <section role="navigation">
-        <header role="banner"><hgroup>
-  <h1><a href="/">Abhijit Pradhan's blog</a></h1>
-  
-    <h2>Thoughts and observations hacking in NYC</h2>
-  
-</hgroup>
 
-</header>
-        
+<body   >
+
+	<div class="container">
+
+		<div class="four columns">
+  			<nav role="navigation"><ul class="title">
+  <li><a href="/">Abhijit Pradhan</a></li>
+</ul>
+  
+<ul class="main-navigation">
+
+  <li class="other"><a href="/">Blog</a></li>
+  <li class="other"><a href="/projects">Projects</a></li>
+  <li class="other"><a href="/about">About</a></li>
+  <li class="other"><a href="https://github.com/apradhn" target="_blank">Github</a></li>
+</ul>
+
+
+  
 <form action="https://www.google.com/search" method="get">
   <fieldset role="search">
     <input type="hidden" name="q" value="site:apradhn.github.io" />
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
-
-<ul class="main-navigation">
-  <li><a href="/">home</a></li>
-  <li><a href="//wg.dotkrnl.com/p/public">public</a></li>
-</ul>
+  
 
 
-      </section>
-      
-        <section>
-  <h2>recent</h2>
+
+</nav>
+        <aside class="sidebar">
+          
+            <section>
+  <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/">Integrating Sidekiq and Pusher in a Rails Application, part 1</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/07/18/the-elements-of-javasscript-style/">The Elements of JavaScript Style</a>
@@ -88,20 +107,55 @@
 
 
 
-      
-    </div>
-  </div>
-  <div id="main">
-    <div class="content">
-      <article class="hentry" role="article">
+          
+
+          <section id="code">
+            <h2>Code</h2>
+              <p><a target="_blank" href="https://github.com/ryandeussing" target="_blank">GitHub</a></p>         
+          </section>
+
+          <section id="habit">
+            <h2>Habit</h2>
+              <p><a target="_blank" href="http://joesgoals.com">Daily goals</a></p>
+              <a target="_blank" href="http://joesgoals.com"><div id="goals"></div></a>  
+          </section>
+
+
+        </aside>    
+  	</div>
+    
+    
+
+  	<div id="main" class="twelve columns">
+	    <div id="content">
+	      <div>
+<article class="hentry" role="article">
   
-  
-    <header>
-      <div class="back"><a href="/" onclick="history.go(-1);return false;">← Back</a></div>
+  <header>
+    
       <h1 class="entry-title">Fun With Enumerables</h1>
-    </header>
+    
+    
+      <p class="meta">
+        
+      </p>
+    
+  </header>
+
+
+    
+      <div class="sharing">
   
-  <div class="entry-content"><p>Over the last few days I've started experimenting with Enumerables. Nearly every lab required iterating through an array or hash in order to crunch some kind of data, so it made sense to use to utilize Ruby's built-in methods for Enumerble rather than push values to empty array inside an <code>#each</code> loop.</p>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/" data-via="" data-counturl="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+
+
+<div class="entry-content"><p>Over the last few days I've started experimenting with Enumerables. Nearly every lab required iterating through an array or hash in order to crunch some kind of data, so it made sense to use to utilize Ruby's built-in methods for Enumerble rather than push values to empty array inside an <code>#each</code> loop.</p>
 
 
 
@@ -284,60 +338,33 @@ games.group_by{|game| game[:console]}
 
 <p>In conclusion, enumerables are powerful methods that allow you to extract the most likely data you want to get from an array or hash, if you know how to use them properly. Nearly all of them can be recreated with an #each loop, but enumerables can save numerous lines of code and consolidate the logic of your program. Enumerables seem like a shortcut, but you can end up in a lot of trouble if you don&rsquo;t know exactly what you&rsquo;re using them for. I&rsquo;m glad we reconstructed some of the enumerables in class last week so that I could get a better understanding of the more exotic enumerables available in Ruby.</p>
 </div>
+
+
   <footer>
-    <div class="articlemeta">
-      <span class="hide">
-        
-
- @
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-09T20:59:28-04:00" pubdate data-updated="true"></time>
-      </span>
-      <span class="plus">
-        
-          <a href="#">+</a>
-        
-      </span>
-    </div>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/" data-via="" data-counturl="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/" >Tweet</a>
-  
-  
-  
-</div>
-
-    
-    <div class="meta">
+    <p class="meta">
       
-    </div>
+        <a class="basic-alignment left" href="/blog/2011/06/01/this-is-a-test/" title="Previous Post: This is post">&laquo; Previous post</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/06/22/user-experience-lessons-from-metroid-prime/" title="next Post: Lessons in Software Design From Super Metroid">Next post &raquo;</a>
+      
+    </p>
   </footer>
-
-
 </article>
 
-
-    </div>
-    <footer role="contentinfo"><div class="content">
-  <p>
-    Copyright &copy; 2015 Abhijit Pradhan
-  </p>
 </div>
 
+	    </div>
+  	</div>
+  
+  <footer role="contentinfo"  class="sixteen columns"><center>
+<p class="credit">
+  <span class="credit">Powered by <a href="http://github.com">GitHub</a>, <a href="https://github.com/imathis/octopress">Octopress</a>, &amp; <a href="https://github.com/dhgamache/Skeleton">Skeleton</a></span>.
+</p>
+</center>
 </footer>
-    
+  
+  
 
 
 
@@ -350,7 +377,7 @@ games.group_by{|game| game[:console]}
       var twitterWidgets = document.createElement('script');
       twitterWidgets.type = 'text/javascript';
       twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
       document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
     })();
   </script>
@@ -359,29 +386,16 @@ games.group_by{|game| game[:console]}
 
 
 
-  </div>
-  <script src="/javascripts/modernizr-2.0.js"></script>
-<script src="//ajax.useso.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-<script src="/javascripts/libs/respond.js" type="text/javascript"></script>
-<script src="/javascripts/octopress.js" type="text/javascript"></script>
 
-
-<script type="text/javascript">
-$(document).ready(function(){
-  var userAgent = navigator.userAgent.toLowerCase();
-  var isiPhone = (userAgent.indexOf('iphone') != -1 || userAgent.indexOf('ipod') != -1) ? true : false;
-  var isAndroid = (userAgent.indexOf('android') != -1) ? true : false;
-  clickEvent = (isiPhone || isAndroid) ? 'touchstart' : 'click';
-  $('#sidebar').on(clickEvent, function() {
-    $(this).toggleClass('open');
+<script>
+  jQuery.noConflict()('li.other').hover (
+    function () {
+    jQuery.noConflict()(this).toggleClass("current-menu-item")
   });
-  $('.articlemeta').on(clickEvent, function() {
-    toggleDisqus();
-    $(this).toggleClass('open');
-  });
-});
 </script>
 
 </body>
 </html>
+
+
+	</div> <!-- container -->
