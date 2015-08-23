@@ -187,4 +187,4 @@ var hasAge = !!age;
 </p>
 
 <h4>Conclusion</h4>
-<p>Reading AirBnb's JavaScript style guide definitely helped me ease some of my anxiety about the language. I wish some of their rules were explained, but overall it's quite informative. My biggest takeaway is that even though JavaScript's scope is weird, you can implement some basic conventions to avoid unforeseen errors down the road. I would definitely recommend new JavaScripters to take a look at the guide, as I personally plan on keeping it bookmarked to so I can rely on it later.</p>
+<p>Reading AirBnb's JavaScript style guide definitely helped me ease some of my anxiety about the language. I wish some of their rules were explained, but overall it's quite informative. My biggest takeaway is that even though JavaScript's scope is weird, you can implement some basic conventions to avoid unforeseen errors down the road. I would definitely recommend new JavaScripters to take a look at the guide, as I personally plan on keeping it bookmarked to so I can rely on it later. The end of the article also has a ton of awesome links for further reading, including other JavaScript style guides. </p>
