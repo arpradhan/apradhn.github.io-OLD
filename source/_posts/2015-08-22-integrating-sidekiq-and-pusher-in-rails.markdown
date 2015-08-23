@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Integrating Sidekiq and Pusher in a Rails Application, part 1"
+title: "Integrating Sidekiq and Pusher in a Rails Application"
 date: 2015-08-22 18:50:04 -0400
 comments: true
 categories: rails, javascript, ruby, sidekiq, pusher, ajax
