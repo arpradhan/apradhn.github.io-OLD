@@ -6,12 +6,8 @@
   <meta charset="utf-8">
   <meta name="author" content="{{ site.author }}">
   <meta name="description" content="{{ site.title }}">
+  <title>{{ site.author }}</title>
 
-  {% if page.categories contains 'persons-of-interest' %}
-    <title>{% if page.title %}{{ page.title }} - {% endif %}Persons of Interest</title>
-  {% else %}
-    <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.author }}</title>
-  {% endif %}
 
 
   {% capture description %}{% if page.description %}{{ page.description }}{% else %}{{ content | raw_content }}{% endif %}{% endcapture %}
