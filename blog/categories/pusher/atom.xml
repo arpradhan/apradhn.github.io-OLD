@@ -4,7 +4,7 @@
   <title><![CDATA[Category: pusher, | Abhijit Pradhan]]></title>
   <link href="http://apradhn.github.io/blog/categories/pusher/atom.xml" rel="self"/>
   <link href="http://apradhn.github.io/"/>
-  <updated>2015-08-22T23:03:47-04:00</updated>
+  <updated>2015-08-22T23:06:11-04:00</updated>
   <id>http://apradhn.github.io/</id>
   <author>
     <name><![CDATA[Abhijit Pradhan]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Integrating Sidekiq and Pusher in a Rails Application, part 1]]></title>
+    <title type="html"><![CDATA[Integrating Sidekiq and Pusher in a Rails Application]]></title>
     <link href="http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/"/>
     <updated>2015-08-22T18:50:04-04:00</updated>
     <id>http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails</id>
