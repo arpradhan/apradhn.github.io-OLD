@@ -1,13 +1,7 @@
 ---
-layout: page
-comments: false
-footer: false
+layout: default
 ---
 
-<div id="blog-archives" class="category">
 {% for post in site.categories[page.category] %}
-<article>
-  {% include archive_post.html %}
-</article>
+	{% include archive_post.html %}
 {% endfor %}
-</div>

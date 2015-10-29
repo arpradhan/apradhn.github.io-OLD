@@ -1,5 +1,6 @@
-<center>
-<p class="credit">
-  <span class="credit">Powered by <a href="http://github.com">GitHub</a>, <a href="https://github.com/imathis/octopress">Octopress</a>, &amp; <a href="https://github.com/dhgamache/Skeleton">Skeleton</a></span>.
-</p>
-</center>
+&copy; {{ site.time | date: "%Y" }}
+{% if site.author %}
+    {{ site.author }}
+{% else %}
+    {{ site.title }}
+{% endif %}

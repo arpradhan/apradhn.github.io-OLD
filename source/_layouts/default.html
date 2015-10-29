@@ -1,53 +1,12 @@
 {% capture root_url %}{{ site.root | strip_slash }}{% endcapture %}
 {% include head.html %}
 
-<body {% if page.body_id %} id="{{ page.body_id }}" {% endif %} {% if page.sidebar == false %} class="no-sidebar" {% endif %} {% if page.sidebar == 'collapse' or site.sidebar == 'collapse' %} class="collapse-sidebar sidebar-footer" {% endif %}>
 
-	<div class="container">
+<body>
+	<header id="header" class="inner">{% include header.html %}</header>
 
-		<div class="four columns">
-  			<nav role="navigation">{% include navigation.html %}</nav>
-        <aside class="sidebar">
-          {% if site.blog_index_asides.size %}
-            {% include_array blog_index_asides %}
-          {% else %}
-            {% include_array default_asides %}
-          {% endif %}
-
-          <section id="code">
-            <h2>Code</h2>
-              <p><a target="_blank" href="https://github.com/apradhn" target="_blank">GitHub</a></p>         
-          </section>
-        </aside>    
-  	</div>
-    
-    {% unless page.url contains '/blog/' %}
-
-    <header class="twelve columns" role="banner">
-    {% include header.html %}
-    </header>
-
-    {% endunless %}
-
-  	<div id="main" class="twelve columns">
-	    <div id="content">
-	      {{ content | expand_urls: root_url }}
-	    </div>
-  	</div>
-  
-  <footer role="contentinfo"  class="sixteen columns">{% include footer.html %}</footer>
-  
-  {% include after_footer.html %}
-
-<script>
-  jQuery.noConflict()('li.other').hover (
-    function () {
-    jQuery.noConflict()(this).toggleClass("current-menu-item")
-  });
-</script>
-
+	<div id="content" class="inner">{{ content | expand_urls: root_url }}</div>
+	<footer id="footer" class="inner">{% include footer.html %}</footer>
+	{% include after_footer.html %}
 </body>
 </html>
-
-
-	</div> <!-- container -->
