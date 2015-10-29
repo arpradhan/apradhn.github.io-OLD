@@ -1,0 +1,283 @@
+
+<!DOCTYPE HTML>
+<html lang="en-GB">
+<head>
+	<meta charset="utf-8">
+	<title>Integrating Sidekiq and Pusher in a Rails Application  | Abhijit Pradhan</title>
+
+	<meta name="author" content="Abhijit Pradhan">
+
+<meta name="description" content="A record of my time learning to code at the Flatiron School in NYC."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Abhijit Pradhan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Abhijit Pradhan</a></h1>
+<span class="tagline">loop do</span>
+<nav id="main-nav"><ul>
+	<li><a href="/about">About</a></li>
+	<li><a href="/archives">Archives</a></li>
+	<li><a href="/contact">Contact</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/about">About</a></li>
+	<li><a href="/archives">Archives</a></li>
+	<li><a href="/contact">Contact</a></li>
+</ul>
+</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<header>
+		<h2 class="title">Integrating Sidekiq and Pusher in a Rails Application</h2>
+		<div class="meta date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-22T18:50:04-04:00" pubdate data-updated="true"></time></div>
+	</header>
+	<div class="entry-content"><h2>The Problem</h2>
+
+<p>When you&rsquo;re building an application that relies on multiple API calls and/or updating a database in bulk with a single user interaction it&rsquo;s crucial offload the work to a background job and serve a user a page as quickly as possible in order to maximize user experience. This was our dilemma for <a href="http://wikivice.herokuapp.com/">WikiVice</a>. We see these events all the time now, from YouTube&rsquo;s progress bar, to the loading circles in Facebook&rsquo;s mobile app. Surprisingly, me and my colleague <a href="https://github.com/hpetrow">Heather Petrow</a>, only found a single guide with information on integrating Sidekiq with Pusher written by <a href="http://cowjumpedoverthecommodore64.blogspot.com/2013/07/scaling-heavy-web-requests-with-sidekiq.html">Karl Baum</a>. The article served as a good jumping off point, but it didn&rsquo;t quite cover the needs of our application.</p>
+
+<p>For one, the examples in the article use CoffeeScript and we decided to stick with JQuery. Secondly, the guide&rsquo;s example is concerned with sending a json response to the client after the server finished the background job. However, we needed to load an ERB partial after background job finished. The guide covers the fundamentals of leveraging Sidekiq and Pusher, but doesn&rsquo;t account for more than one use case of a Rails application.</p>
+
+<p>WikiVice is a rails app that display data visualizations for a Wikipedia article based on its revision history, in order to make the user question their assumptions about the world&rsquo;s most popular encylopedia. We designed our app around a single interaction: the search form. A user searches for a Wikipedia article, and the following page displays a detailed breakdown on the revision history of the article.</p>
+
+<p>When a user submits a search the app sends several queries to <a href="https://en.wikipedia.org/w/api.php">MediaWiki API</a>. The first is for an article&rsquo;s title. We rely on the response from the API to judge whether a search is valid, in order provide form validation. Then we submit several requests to the revisions api until we get around 500 results. With the results in hand, we persist them to the datbase into the Page, Author and Revisions model.</p>
+
+<p>The first prototype of the site took nearly 30 seconds to finish loeading, so improving speed was my primary responisbiltiy on the application. The easy solution involved reducing the amount of requests we send to Wikipedia. However, that comes at the cost of the quality of our dataset. My team and I agreed that 500 revisions per page was the baseline amount we needed to give the user an accurate depiction of the life a Wikipedia article.</p>
+
+<p>First, I reduced database transactions. I refactored all our models to use eager loading when possible, and found a gem called <a href="https://github.com/zdennis/activerecord-import">activerecord-import</a> that allows you to bulk insert mulitple rows in database in one transaction. These efforts doubled the speed of the website. But the site still took about 10 seconds to load, and when we deployed to Heroku the site shut down because Heroku timed out the request.</p>
+
+<h2>The Solution</h2>
+
+<p>That&rsquo;s when we realized we needed to use Background Jobs. We conceptualized the task as thus: When the user submits a search term, we call the Wikipedia API to validate the title. When we verify the title, we take the user to a page with the title in a heading, and a spinning circle. We want to replace the spinning circle with a dashboard once the background job has finished. It&rsquo;s almost like a reverse ajax call in that the server asynchronously sends a response to the client.</p>
+
+<h2>Setting up Sidekiq</h2>
+
+<p>Setting up Sidekiq and Pusher is relatively simple, the challenge is getting the two things to talk one another. <a href="https://github.com/mperham/sidekiq">Sidekiq</a> is a great little gem that enqueues Redis jobs with minimal setup. Create a class, include the <code>Sidekiq::Worker module</code>, and write a <code>#perform</code> method like so:</p>
+
+<div><script src='https://gist.github.com/bd3de78fc58208f01d0d.js'></script>
+<noscript><pre><code>class WikiWorker
+  require &quot;pusher&quot;
+  include Sidekiq::Worker
+
+  def perform(id)
+    page = Page.find(id)
+    wiki = WikiWrapper.new
+    page = wiki.get_page(page.title)
+  end
+end</code></pre></noscript></div>
+
+
+<p><code>wiki.get_page</code> is the method that sends requests to Wikipedia&rsquo;s API and persists the results in the database. In order to initiate the background job, go to your controller and call <code>.perform_async</code> on your worker class, e.g.</p>
+
+<div><script src='https://gist.github.com/bb56ae3a125f9e1dfbe5.js'></script>
+<noscript><pre><code>class PagesController &lt;&lt; ApplicationController
+  def show
+    respond_to do |format|
+      format.html do 
+        @page = Page.find(params[:id])
+        WikiWorker.perform_async(@page.id)
+      end
+      format.js{}
+    end
+  end
+end
+</code></pre></noscript></div>
+
+
+<p>In order for your application to start handling background jobs, you must start your redis server and sidekiq listener. Start your redis server with the terminal command <code>redis-server</code>. Start sidekiq with <code>bundle exec sidekiq</code></p>
+
+<p>It&rsquo;s important to send simple argument to Sidekiq jobs. When you run a background job, Sidekiq serializes the arguments into a JSON string and pushes that string into a Redis queue. The datatypes allowed include number, string, boolean, array, and hash. Therefore, if you want a background job to act on an object, I advise passing a object&rsquo;s id. Once you have the id, you can find the object with an ActiveRecord method inside the perform method.</p>
+
+<h2>Debugging Sidekiq</h2>
+
+<p>Debugging Sidekiq can be a little annoying because it involves 3 running process, your rails server, redis server, and sidekiq listener. Whenever you make a change to code in your Worker, I highly advise you to reset all three (rails server, redis server, and sidekiq listener). If you do not reset all three, you can&rsquo;t be sure if you have a background process in queue or not. Also, if you make a change to your worker code, It won&rsquo;t take effect until you reset Sidekiq.</p>
+
+<h2>Pusher</h2>
+
+<p>How do you know when the job is finished? This is where <a href="https://pusher.com/">Pusher</a> comes in to play. Pusher is hosted API that simplifies WebSockets in order to provide bi-directional communiciation between a client and a server, or clients and other clients e.g. chat. The most important step to enabling Pusher is setting up channel. You can call a channel whatever you want, as long as its consistent betwen the server and client. It&rsquo;s best practice to keep the channel names unique to the page or user, because more than one client can use the same channel.</p>
+
+<h2>Pusher &ndash; Rails</h2>
+
+<p>Let&rsquo;s start with setting up our server-side code. This is the easy part. Step one: initialize a Pusher object. Step two, trigger a pusher event to the channel.</p>
+
+<div><script src='https://gist.github.com/fab0033f00eada0ea437.js'></script>
+<noscript><pre><code>class WikiWorker
+  require &quot;pusher&quot;
+  include Sidekiq::Worker
+
+  def perform(id)
+    page = Page.find(id)
+    wiki = WikiWrapper.new
+    page = wiki.get_page(page.title)
+
+    pusher = Pusher::Client.new(
+    { 
+      app_id: ENV[&quot;PUSHER_APP_ID&quot;],
+      key: ENV[&quot;PUSHER_KEY&quot;],
+      secret: ENV[&quot;PUSHER_SECRET&quot;]
+    }
+    ) 
+    pusher.trigger(&quot;page_results_#{page.id}&quot;, &quot;get_page&quot;, {:id =&gt; page.id, :title =&gt; page.title, :revisionRate =&gt; page.time_between_revisions})
+  end
+end</code></pre></noscript></div>
+
+
+<p>Line 10 involves the usual method of setting up a client that interacts with a 3rd party api. You have to initialize it with your api key info in order to start a connection to Pusher&rsquo;s web sockets api.</p>
+
+<p>line 17 is where the magic happens. &ldquo;#trigger&rdquo; executes the callback function &ldquo;get_page&rdquo;, passing the hash as a json object, on the page results channel.</p>
+
+<h2>Pusher &ndash; JavaScript</h2>
+
+<p>The key event here is <code>channel.bind('subscription:succeeded', function() {})</code>. You will notice that the following code binds an event to another event. I have not seen other tutorials use this implementation, but that might be because they don&rsquo;t cover this particular implementation. &lsquo;subscription:succeeded&rsquo; is a special event that fires when a client has successfully registered a subscription with Pusher. By nesting events within &lsquo;subscription:succeeded&rsquo;, you ensure that a client event triggers.</p>
+
+<p> However, in order to use Client Events, you must update your Pusher account settings. Go to Settings, check &lsquo;Enable Client Events&rsquo;, and click &lsquo;Update&rsquo;. You must enable these setting for the following code to work.</p>
+
+<div><script src='https://gist.github.com/bbba5f5ce6d7ef935415.js'></script>
+<noscript><pre><code>$(function() {
+ Pusher.log = function(message) {
+    if (window.console &amp;&amp; window.console.log) {
+      window.console.log(message);
+    }
+  };
+
+  var id = $(&quot;#page_id&quot;).text();
+
+  var pusher = new Pusher(&#39;xxxxxxxxxx&#39;, {
+    encrypted: true
+  });
+  var channel = pusher.subscribe(&#39;page_results_&#39; + id);
+
+
+  channel.bind(&#39;pusher:subscription_succeeded&#39;, function() {
+    channel.bind(&#39;get_page&#39;, function(data) {
+      console.log(data.id);
+
+      $.ajax({
+        method: &quot;GET&quot;,
+        url: &quot;/dashboard&quot;,
+        data: {id: data.id},
+        dataType: &quot;script&quot;
+      });
+      pusher.unsubscribe(&quot;page_results_&quot; + id);
+    });
+  });
+});
+</code></pre></noscript></div>
+
+
+<p>Lets take a closer look at everything that&rsquo;s happening here. Line 1 includes the source for the pusher js library that sets up the channel. Lines 4 through 7 provide debugging info for Pusher. I highly recommend including the debugger script as it outputs detailed info about the connection state of pusher events.</p>
+
+<p>Line 10, establishes the page id, taken from a hidden html element on the page.</p>
+
+<p>Lines 12-15 initialize the Pusher object, and subscribe to a unique page channel.</p>
+
+<p>Lines 18 and 19 are crucial. Most pusher tutorials explain that you simply need to bind a callback function to your channel in order to get bi-directional communication started. However, when you&rsquo;re using pusher in connection with a time intensive background job, you need to be careful about the sequence of connections.</p>
+
+<p>You must wait to bind the channel to the event after the channel has been successfully subscribed to. Otherwise, your JavaScript will never receive the message from the server. Binding an event to &lsquo;pusher:subscription_succeeded&rsquo; ensures that future bindings will take place once a channel has been successuflly subscribed to between a client and the server.</p>
+
+<p>Pusher has a really great debugging console that allows you to monitor connections to the Pusher API. Looking at the console, you want to make sure your connections follow this sequence: Connection, Subscribed, API message. Here&rsquo;s a screen shot of my console for help:
+<img src="/images/pusher_console.png"></p>
+
+<p> In my example, we added <code>pusher.unsubscribe"page_results"+id);</code> in order to close the channel after the background job finished.</p>
+
+<p>The most important thing to remember here is to that you want to bind the callback AFTER the channel has been successfully subscribed to. Once the background job subscribes to the channel, it will execute the binded callback function.</p>
+
+<h2>Rendering an ERB partial with Pusher</h2>
+
+<p>In our case, we don&rsquo;t really need to pass data between Sidekiq and Pusher, receiving the data is simply a signal that we&rsquo;re ready to load the ERB template with data visualizations. The dashboard is dependent on the page having a revision history, so we do not want to load the template before the background job finishes.</p>
+
+<p>In order to render an ERB partial in conjunction with Pusher, we simply made AJAX request to separate controller action responsible for rendering a partial asynchronously. We added a GET /dashboard route and mapped it to Page#dashboard. When an AJAX request hits /dashboard, the Pages controller responds by executing &ldquo;dashboard.js.erb&rdquo;, as is convention with AJAX requests in rails.</p>
+
+<p>In order to take advantage of this convention, you must send an AJAX request with a dataType of &ldquo;script&rdquo;.</p>
+
+<p>Lastly, &ldquo;dashboard.js.erb&rdquo; is responsible for replacing the spinner gif with the dashboard partial:</p>
+
+<div><script src='https://gist.github.com/80476c2743227fcfa992.js'></script>
+<noscript><pre><code>$(&quot;#page-data&quot;).replaceWith(&quot;&lt;%= j render &#39;dashboard&#39; %&gt;&quot;);
+</code></pre></noscript></div>
+
+
+<p>If we called the AJAX request to <code>/dashboard</code> before the push notification, nothing would render because the Sidekiq is in the middle of processing the background job. We&rsquo;re simply using Pusher as a timer for when to fire the AJAX request.</p>
+
+<h2>Conclusion</h2>
+
+<p>In conclusion, Sidekiq and Pusher are a powerful tool for maximizing the user experience when you need to crunch a lot of data in single request cycle. In the future, I&rsquo;d like to develop the progress indicator. Right now, we simply have a spinner gif that displays until the erb template gets injected. However, I&rsquo;d like to implement a progress bar that indicates what&rsquo;s actually happening behind the scenes for a more informed user experience. Sometimes, the request hangs up, so it would be nice to let the user know when they need to refresh the page, instead of having the user stare at a spinning circle forever.</p>
+</div>
+	
+
+</article>
+
+	
+	<div class="share">
+		<ul>
+			<li>
+  <a href="https://twitter.com/intent/tweet?text=Integrating Sidekiq and Pusher in a Rails Application by @&url=http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/" title="Share Integrating Sidekiq and Pusher in a Rails Application on Twitter">
+    <img src="/images/social/twitter.png" />
+  </a>
+</li>
+
+			<li>
+  <a href="https://www.facebook.com/sharer.php?u=http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/" title="Share Integrating Sidekiq and Pusher in a Rails Application on Facebook">
+    <img src="/images/social/facebook.png" />
+  </a>
+</li>
+
+			<li>
+  <a href="https://plus.google.com/share?url=http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/" title="Share Integrating Sidekiq and Pusher in a Rails Application on Google Plus">
+    <img src="/images/social/google.png" />
+  </a>
+</li>
+
+		</ul>
+	</div>
+
+
+
+</div>
+	<footer id="footer" class="inner">&copy; 2015
+
+    Abhijit Pradhan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/hyphenator.js"></script>
+
+
+
+
+
+
+
+</body>
+</html>
