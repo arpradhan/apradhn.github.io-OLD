@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Abhijit Pradhan]]></title>
+  <link href="http://apradhn.github.io/atom.xml" rel="self"/>
+  <link href="http://apradhn.github.io/"/>
+  <updated>2015-10-29T00:03:39-04:00</updated>
+  <id>http://apradhn.github.io/</id>
+  <author>
+    <name><![CDATA[Abhijit Pradhan]]></name>
+    
+  </author>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Let's Talk About Flex: Building UI's with CSS Flexboxes]]></title>
+    <link href="http://apradhn.github.io/blog/2015/09/09/lets-talk-about-flex-building-uis-with-css-flexboxes/"/>
+    <updated>2015-09-09T15:42:39-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/09/09/lets-talk-about-flex-building-uis-with-css-flexboxes</id>
+    <content type="html"><![CDATA[<p>CSS has evolved much since its early days on the web, but until recently centering elements on a page has proven an absurdly difficult task. It&rsquo;s the earliest hurdle you face as a web designer, and until flex boxes there hasn&rsquo;t been a major consensus on how to center elements. There are thousands of articles on the internet describing thousands of different ways to center elements. And if you want to center an element vertically? Forget about it. Theses guides usually involve some complex process of combining floats, calculating margin differences, line heights, etc. Line heights? Seriously? You should not need to alter an elements line height just to get a thing centered in a box.</p>
+
+<p>Thankfully, Flexboxes allow you to center elements easily, rendering all those guides obsolete. Additionally, flexboxes allow the web designer to design a user interface elements for an application that is more similar to what a user expects from a smartphone application. I&rsquo;m excited for flexboxes to become more mainstream because it will move the quality of web design that much closer to print.</p>
+
+<p>Flexbox is a newer CSS element, but the majority of browsers have implemented the flexbox specification. Only Safari and Safari iOS require you to prefix the CSS declaration with <code>-webkit-</code>. You can learn more about the status of Flexbox&rsquo;s implementation in browsers at <a href="http://caniuse.com/#feat=flexbox">caniuse.com</a>.</p>
+
+<p>What makes Flexbox so magical? At the heart of the Flexbox specification is an algorithim that automatically calculates the appropriate margins</p>
+
+<p>As an example, lets design the AKAI MPC 2000 using flexboxes:
+<img src="http://medias.audiofanzine.com/images/normal/akai-mpc2000-618501.jpg" alt="AIKI MPC 2000" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Integrating Sidekiq and Pusher in a Rails Application]]></title>
+    <link href="http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails/"/>
+    <updated>2015-08-22T18:50:04-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/08/22/integrating-sidekiq-and-pusher-in-rails</id>
+    <content type="html"><![CDATA[<h2>The Problem</h2>
+
+<p>When you&rsquo;re building an application that relies on multiple API calls and/or updating a database in bulk with a single user interaction it&rsquo;s crucial offload the work to a background job and serve a user a page as quickly as possible in order to maximize user experience. This was our dilemma for <a href="http://wikivice.herokuapp.com/">WikiVice</a>. We see these events all the time now, from YouTube&rsquo;s progress bar, to the loading circles in Facebook&rsquo;s mobile app. Surprisingly, me and my colleague <a href="https://github.com/hpetrow">Heather Petrow</a>, only found a single guide with information on integrating Sidekiq with Pusher written by <a href="http://cowjumpedoverthecommodore64.blogspot.com/2013/07/scaling-heavy-web-requests-with-sidekiq.html">Karl Baum</a>. The article served as a good jumping off point, but it didn&rsquo;t quite cover the needs of our application.</p>
+
+<p>For one, the examples in the article use CoffeeScript and we decided to stick with JQuery. Secondly, the guide&rsquo;s example is concerned with sending a json response to the client after the server finished the background job. However, we needed to load an ERB partial after background job finished. The guide covers the fundamentals of leveraging Sidekiq and Pusher, but doesn&rsquo;t account for more than one use case of a Rails application.</p>
+
+<p>WikiVice is a rails app that display data visualizations for a Wikipedia article based on its revision history, in order to make the user question their assumptions about the world&rsquo;s most popular encylopedia. We designed our app around a single interaction: the search form. A user searches for a Wikipedia article, and the following page displays a detailed breakdown on the revision history of the article.</p>
+
+<p>When a user submits a search the app sends several queries to <a href="https://en.wikipedia.org/w/api.php">MediaWiki API</a>. The first is for an article&rsquo;s title. We rely on the response from the API to judge whether a search is valid, in order provide form validation. Then we submit several requests to the revisions api until we get around 500 results. With the results in hand, we persist them to the datbase into the Page, Author and Revisions model.</p>
+
+<p>The first prototype of the site took nearly 30 seconds to finish loeading, so improving speed was my primary responisbiltiy on the application. The easy solution involved reducing the amount of requests we send to Wikipedia. However, that comes at the cost of the quality of our dataset. My team and I agreed that 500 revisions per page was the baseline amount we needed to give the user an accurate depiction of the life a Wikipedia article.</p>
+
+<p>First, I reduced database transactions. I refactored all our models to use eager loading when possible, and found a gem called <a href="https://github.com/zdennis/activerecord-import">activerecord-import</a> that allows you to bulk insert mulitple rows in database in one transaction. These efforts doubled the speed of the website. But the site still took about 10 seconds to load, and when we deployed to Heroku the site shut down because Heroku timed out the request.</p>
+
+<h2>The Solution</h2>
+
+<p>That&rsquo;s when we realized we needed to use Background Jobs. We conceptualized the task as thus: When the user submits a search term, we call the Wikipedia API to validate the title. When we verify the title, we take the user to a page with the title in a heading, and a spinning circle. We want to replace the spinning circle with a dashboard once the background job has finished. It&rsquo;s almost like a reverse ajax call in that the server asynchronously sends a response to the client.</p>
+
+<h2>Setting up Sidekiq</h2>
+
+<p>Setting up Sidekiq and Pusher is relatively simple, the challenge is getting the two things to talk one another. <a href="https://github.com/mperham/sidekiq">Sidekiq</a> is a great little gem that enqueues Redis jobs with minimal setup. Create a class, include the <code>Sidekiq::Worker module</code>, and write a <code>#perform</code> method like so:</p>
+
+<div><script src='https://gist.github.com/bd3de78fc58208f01d0d.js'></script>
+<noscript><pre><code>class WikiWorker
+  require &quot;pusher&quot;
+  include Sidekiq::Worker
+
+  def perform(id)
+    page = Page.find(id)
+    wiki = WikiWrapper.new
+    page = wiki.get_page(page.title)
+  end
+end</code></pre></noscript></div>
+
+
+<p><code>wiki.get_page</code> is the method that sends requests to Wikipedia&rsquo;s API and persists the results in the database. In order to initiate the background job, go to your controller and call <code>.perform_async</code> on your worker class, e.g.</p>
+
+<div><script src='https://gist.github.com/bb56ae3a125f9e1dfbe5.js'></script>
+<noscript><pre><code>class PagesController &lt;&lt; ApplicationController
+  def show
+    respond_to do |format|
+      format.html do 
+        @page = Page.find(params[:id])
+        WikiWorker.perform_async(@page.id)
+      end
+      format.js{}
+    end
+  end
+end
+</code></pre></noscript></div>
+
+
+<p>In order for your application to start handling background jobs, you must start your redis server and sidekiq listener. Start your redis server with the terminal command <code>redis-server</code>. Start sidekiq with <code>bundle exec sidekiq</code></p>
+
+<p>It&rsquo;s important to send simple argument to Sidekiq jobs. When you run a background job, Sidekiq serializes the arguments into a JSON string and pushes that string into a Redis queue. The datatypes allowed include number, string, boolean, array, and hash. Therefore, if you want a background job to act on an object, I advise passing a object&rsquo;s id. Once you have the id, you can find the object with an ActiveRecord method inside the perform method.</p>
+
+<h2>Debugging Sidekiq</h2>
+
+<p>Debugging Sidekiq can be a little annoying because it involves 3 running process, your rails server, redis server, and sidekiq listener. Whenever you make a change to code in your Worker, I highly advise you to reset all three (rails server, redis server, and sidekiq listener). If you do not reset all three, you can&rsquo;t be sure if you have a background process in queue or not. Also, if you make a change to your worker code, It won&rsquo;t take effect until you reset Sidekiq.</p>
+
+<h2>Pusher</h2>
+
+<p>How do you know when the job is finished? This is where <a href="https://pusher.com/">Pusher</a> comes in to play. Pusher is hosted API that simplifies WebSockets in order to provide bi-directional communiciation between a client and a server, or clients and other clients e.g. chat. The most important step to enabling Pusher is setting up channel. You can call a channel whatever you want, as long as its consistent betwen the server and client. It&rsquo;s best practice to keep the channel names unique to the page or user, because more than one client can use the same channel.</p>
+
+<h2>Pusher &ndash; Rails</h2>
+
+<p>Let&rsquo;s start with setting up our server-side code. This is the easy part. Step one: initialize a Pusher object. Step two, trigger a pusher event to the channel.</p>
+
+<div><script src='https://gist.github.com/fab0033f00eada0ea437.js'></script>
+<noscript><pre><code>class WikiWorker
+  require &quot;pusher&quot;
+  include Sidekiq::Worker
+
+  def perform(id)
+    page = Page.find(id)
+    wiki = WikiWrapper.new
+    page = wiki.get_page(page.title)
+
+    pusher = Pusher::Client.new(
+    { 
+      app_id: ENV[&quot;PUSHER_APP_ID&quot;],
+      key: ENV[&quot;PUSHER_KEY&quot;],
+      secret: ENV[&quot;PUSHER_SECRET&quot;]
+    }
+    ) 
+    pusher.trigger(&quot;page_results_#{page.id}&quot;, &quot;get_page&quot;, {:id =&gt; page.id, :title =&gt; page.title, :revisionRate =&gt; page.time_between_revisions})
+  end
+end</code></pre></noscript></div>
+
+
+<p>Line 10 involves the usual method of setting up a client that interacts with a 3rd party api. You have to initialize it with your api key info in order to start a connection to Pusher&rsquo;s web sockets api.</p>
+
+<p>line 17 is where the magic happens. &ldquo;#trigger&rdquo; executes the callback function &ldquo;get_page&rdquo;, passing the hash as a json object, on the page results channel.</p>
+
+<h2>Pusher &ndash; JavaScript</h2>
+
+<p>The key event here is <code>channel.bind('subscription:succeeded', function() {})</code>. You will notice that the following code binds an event to another event. I have not seen other tutorials use this implementation, but that might be because they don&rsquo;t cover this particular implementation. &lsquo;subscription:succeeded&rsquo; is a special event that fires when a client has successfully registered a subscription with Pusher. By nesting events within &lsquo;subscription:succeeded&rsquo;, you ensure that a client event triggers.</p>
+
+<p> However, in order to use Client Events, you must update your Pusher account settings. Go to Settings, check &lsquo;Enable Client Events&rsquo;, and click &lsquo;Update&rsquo;. You must enable these setting for the following code to work.</p>
+
+<div><script src='https://gist.github.com/bbba5f5ce6d7ef935415.js'></script>
+<noscript><pre><code>$(function() {
+ Pusher.log = function(message) {
+    if (window.console &amp;&amp; window.console.log) {
+      window.console.log(message);
+    }
+  };
+
+  var id = $(&quot;#page_id&quot;).text();
+
+  var pusher = new Pusher(&#39;xxxxxxxxxx&#39;, {
+    encrypted: true
+  });
+  var channel = pusher.subscribe(&#39;page_results_&#39; + id);
+
+
+  channel.bind(&#39;pusher:subscription_succeeded&#39;, function() {
+    channel.bind(&#39;get_page&#39;, function(data) {
+      console.log(data.id);
+
+      $.ajax({
+        method: &quot;GET&quot;,
+        url: &quot;/dashboard&quot;,
+        data: {id: data.id},
+        dataType: &quot;script&quot;
+      });
+      pusher.unsubscribe(&quot;page_results_&quot; + id);
+    });
+  });
+});
+</code></pre></noscript></div>
+
+
+<p>Lets take a closer look at everything that&rsquo;s happening here. Line 1 includes the source for the pusher js library that sets up the channel. Lines 4 through 7 provide debugging info for Pusher. I highly recommend including the debugger script as it outputs detailed info about the connection state of pusher events.</p>
+
+<p>Line 10, establishes the page id, taken from a hidden html element on the page.</p>
+
+<p>Lines 12-15 initialize the Pusher object, and subscribe to a unique page channel.</p>
+
+<p>Lines 18 and 19 are crucial. Most pusher tutorials explain that you simply need to bind a callback function to your channel in order to get bi-directional communication started. However, when you&rsquo;re using pusher in connection with a time intensive background job, you need to be careful about the sequence of connections.</p>
+
+<p>You must wait to bind the channel to the event after the channel has been successfully subscribed to. Otherwise, your JavaScript will never receive the message from the server. Binding an event to &lsquo;pusher:subscription_succeeded&rsquo; ensures that future bindings will take place once a channel has been successuflly subscribed to between a client and the server.</p>
+
+<p>Pusher has a really great debugging console that allows you to monitor connections to the Pusher API. Looking at the console, you want to make sure your connections follow this sequence: Connection, Subscribed, API message. Here&rsquo;s a screen shot of my console for help:
+<img src="http://apradhn.github.io/images/pusher_console.png"></p>
+
+<p> In my example, we added <code>pusher.unsubscribe"page_results"+id);</code> in order to close the channel after the background job finished.</p>
+
+<p>The most important thing to remember here is to that you want to bind the callback AFTER the channel has been successfully subscribed to. Once the background job subscribes to the channel, it will execute the binded callback function.</p>
+
+<h2>Rendering an ERB partial with Pusher</h2>
+
+<p>In our case, we don&rsquo;t really need to pass data between Sidekiq and Pusher, receiving the data is simply a signal that we&rsquo;re ready to load the ERB template with data visualizations. The dashboard is dependent on the page having a revision history, so we do not want to load the template before the background job finishes.</p>
+
+<p>In order to render an ERB partial in conjunction with Pusher, we simply made AJAX request to separate controller action responsible for rendering a partial asynchronously. We added a GET /dashboard route and mapped it to Page#dashboard. When an AJAX request hits /dashboard, the Pages controller responds by executing &ldquo;dashboard.js.erb&rdquo;, as is convention with AJAX requests in rails.</p>
+
+<p>In order to take advantage of this convention, you must send an AJAX request with a dataType of &ldquo;script&rdquo;.</p>
+
+<p>Lastly, &ldquo;dashboard.js.erb&rdquo; is responsible for replacing the spinner gif with the dashboard partial:</p>
+
+<div><script src='https://gist.github.com/80476c2743227fcfa992.js'></script>
+<noscript><pre><code>$(&quot;#page-data&quot;).replaceWith(&quot;&lt;%= j render &#39;dashboard&#39; %&gt;&quot;);
+</code></pre></noscript></div>
+
+
+<p>If we called the AJAX request to <code>/dashboard</code> before the push notification, nothing would render because the Sidekiq is in the middle of processing the background job. We&rsquo;re simply using Pusher as a timer for when to fire the AJAX request.</p>
+
+<h2>Conclusion</h2>
+
+<p>In conclusion, Sidekiq and Pusher are a powerful tool for maximizing the user experience when you need to crunch a lot of data in single request cycle. In the future, I&rsquo;d like to develop the progress indicator. Right now, we simply have a spinner gif that displays until the erb template gets injected. However, I&rsquo;d like to implement a progress bar that indicates what&rsquo;s actually happening behind the scenes for a more informed user experience. Sometimes, the request hangs up, so it would be nice to let the user know when they need to refresh the page, instead of having the user stare at a spinning circle forever.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Elements of JavaScript Style]]></title>
+    <link href="http://apradhn.github.io/blog/2015/07/18/the-elements-of-javasscript-style/"/>
+    <updated>2015-07-18T20:48:44-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/07/18/the-elements-of-javasscript-style</id>
+    <content type="html"><![CDATA[<p>This week we started learning JavaScript, and although it's a nifty language I can't help but miss Ruby. What I admired most about Ruby was the way it encouraged productivity by removing the need for repetitive syntax. Ruby also inspires the programmer to think about how their code looks. After 8 weeks of coding in Ruby I feel like i had developed a personal style with the language, and I'm struggling to develop a voice for JavaScript.</p>
+
+
+
+
+<p>
+  Adding a semi-colon to each line may seem like a small issue. But I feel that my creativity and productivity is limited by having to obey the strict syntax of the language. There are plenty of great guides on any given topic in JavaScript, but I wondered if there was some kind of style guide on JavaScript that would help me appreciate the language more. 
+</p>
+
+
+<p><img class="left" src="https://upload.wikimedia.org/wikipedia/en/2/22/Elements_of_Style_cover.jpg" alt="Elements of Style cover"></p>
+
+<p>
+  If you've ever taken a writing class chances are you have some version of this book. In fact, i'm pretty sure I have a few. Written by William Strunk and E.B. White the book outlines several principles that promote concise, clear writing and also describes common pitfalls of poor writing to avoid. 
+  </p>
+
+
+
+
+<p>The book is so popular that many fields have their own "Elements of Style" type guide. There's even an "Elements of Programming Style" book. Published in the 70s, some parts of it are irrelevant to a modern audience. The programming languages used in the book include Fortran and PL/I, which do not really use Object Oriented Design. Additionally, some of the rules refer to coding practices that are totally outdated.
+</p>
+
+
+
+
+<blockquote>
+  15. Avoid gotos completely if you can keep the program readable.
+</blockquote>
+
+
+
+
+<p>
+  But most of the rules remain relevant to practically any programming language:
+</p>
+
+
+
+
+<blockquote>
+39. Make it right before you make it faster <br>
+40. Make it fail-safe before you make it faster.<br>
+41. Make it clear before you make it faster. <br>
+</blockquote>
+
+
+
+
+<p>
+  I wanted to find out if there was a style guide for JavaScript, so I Googled "JavaScript style guide". Interestingly, AirBnb's JavaScript style guide was the first search result.
+  Reading it definitely helped get a better appreciation for JavaScript's subtleties. Unfortunately, most the coolness like array spreads and passing blocks are brand new and do not have full browser support. Therefore, this blog post will focus on their es5 version of the guide.
+</p>
+
+
+
+
+<h3><a href="https://github.com/airbnb/javascript/tree/master/es5">airbnb/javascript (es5)</a></h3>
+
+
+
+
+<h4>Arrays</h4>
+
+
+
+
+<p>
+  Since JavaScript lacks many of the enumerables of Ruby I found myself copying arrays quite a bit. Creating a copy of an array usually involves some version of the for loop. However, you can simply use Array#slice to copy an array in one line of code: 
+</p>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">itemsCopy</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">i</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// bad</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">itemsCopy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">items</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// good</span>
+</span><span class='line'><span class="nx">itemsCopy</span> <span class="o">=</span> <span class="nx">items</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<p>You can also use Array#slice to convert an array-like object into an array</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">trigger</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This example creates an array from any arguments passed to the function. This allows you to recreate the splat operator from Ruby, so you can write a function that takes any number of arguments.</p>
+
+
+
+
+<h4>Strings</h4>
+
+
+
+
+<p>Compared to Ruby, string manipulation in JavaScript is pain in the ass. Therefore AirBnb has a few style rules to keep things in order, like using single quotes. They don't explain why, but I imagine it has to do with avoiding unecessary shift keying. Rubyists prefer double quotes because they are required for string interpolation, but since JavaScript doesn't have string interpolation anyways, double quotes are arbitrary. </p>
+
+
+
+
+<p>
+  Additionally, they advise concatenating strings longer than 80 characters. Doing so greatly aids the readability of the code.
+</p>
+
+
+
+
+<p>Since JavaScript lacks string interpolation, AirBnb recommend using Array#join to build strings programmtically. This is especially helpful when building html tags:</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">inbox</span><span class="p">(</span><span class="nx">messages</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">items</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// use direct assignment in this case because we&#39;re micro-optimizing.</span>
+</span><span class='line'>    <span class="nx">items</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&lt;li&gt;&#39;</span> <span class="o">+</span> <span class="nx">messages</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">message</span> <span class="o">+</span> <span class="s1">&#39;&lt;/li&gt;&#39;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="s1">&#39;&lt;ul&gt;&#39;</span> <span class="o">+</span> <span class="nx">items</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&lt;/ul&gt;&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Functions</h4>
+
+
+<p>AirBnb advises against declaring functions in a non-function block, for example if statements and for loops. I don't really understand this one because I've never had the need to define a function within a loop or a conditional.</p>
+
+
+
+
+<h4>Properties</h4>
+
+
+<p>An object's property's can be accessed via dot-notation or subscript notation <code>[]</code>. Use dot-notation when accessing an object's properties, and use subscript notation when accessing accessing properties within a function. Subscript notation is useful in funcitons because you can acess an object's properties without knowing the name of the property.</p>
+
+
+
+
+<h4>Variables</h4>
+
+
+<p>AirBnb recommends using one <code>var</code> declaration per variable. This surprised me because I was using commas so i wouldn't have to keep keying <code>var</code>. But they argue that using one <code>var</code> per variable makes it easier to add new variable declarations. I see their point here, because I do remember it being a pain to add new variabeles to my comma separated list. The comma separated list implies that you know all the variables you're ever going to need when you start writing a function, and that just isn't the case.</p>
+
+
+<p>They also recommend declaring unassigned variables last, because it ensures that you will be able to assign the variable based on the values of the previously defined variables. Additionally, they recommend assigning variables at the top of their scope in order to reduce variable declaration and assignment hoisting issues. This is especially helpful for me because sometimes i need to use variables within loops, but I was confused about how they were scoped. declaring everything at the top ensures that all variables have the same scope, so you never have to consider their scope later on.</p>
+
+
+
+
+<h4>Comparison Operators and Equality</h4>
+
+
+<p>AirBnb offers some super helpful shorcuts for evaluating Boolean logic that I will definitely make a point of using. These shortcuts take advantage of the fact that you can pass a single variable to a conditional in JavaScript just like Ruby. For example if you want to check if a string is empty simply pass the string to the conditional, because an empty string <code>''</code> evaluates to false. You can also use this to check whether a collection is empty, since 0 evaluates to false:
+</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">collection</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// ...stuff...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Blocks</h4>
+
+
+<p>One of the coolest tricks I learned was that you only need to use braces for multiline blocks. So if you have conditional that executes one line you can simply write:</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// good</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">test</span><span class="p">)</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Commments</h4>
+
+
+<p>AirBnb recommened using multi-line comments to describe functions. One of the nice things about Ruby was that you didn't really need comments because it was so readable. Therefore, multiline comments allow the reader to quickly understand the purpose of your JavaScript functions.</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// good</span>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * make() returns a new element</span>
+</span><span class='line'><span class="cm"> * based on the passed in tag name</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * @param {String} tag</span>
+</span><span class='line'><span class="cm"> * @return {Element} element</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">make</span><span class="p">(</span><span class="nx">tag</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// ...stuff...</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">element</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Whitespace</h4>
+
+
+<p>Chaining methods is a common practice in JavaScript, but long method chains are difficult to read and keep track of. Therefore, you should start a new line leading with the dot of the method call.</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">leds</span> <span class="o">=</span> <span class="nx">stage</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s1">&#39;.led&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;svg:svg&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s1">&#39;led&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">radius</span> <span class="o">+</span> <span class="nx">margin</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;svg:g&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;transform&#39;</span><span class="p">,</span> <span class="s1">&#39;translate(&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">radius</span> <span class="o">+</span> <span class="nx">margin</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">radius</span> <span class="o">+</span> <span class="nx">margin</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">tron</span><span class="p">.</span><span class="nx">led</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Commas</h4>
+
+
+<p>I noticed that in some of the labs, objects are written with trailing commas, which caused me some confusion. While it's tempting to use trailing commas in order to make it easier to add properties, this actually throws an error for  IE6/7 and IE9 if it's in quirksmode. At Flatiron, we probably don't need to worry about that case, but I personally refer to leave them off for style sake.</p>
+
+
+
+
+<h4>Type Casting  &amp; Coercion</h4>
+
+
+<p>Controlling type can be annoying in JavaScript so I was pleased to learn a few tricks to help reduce errors. For example if you want to turn a number into a string:</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">totalScore</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">reviewScore</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>#parseInt() is the most popular way of converting a string into a number, but you can also use Number();</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">val</span> <span class="o">=</span> <span class="nb">Number</span><span class="p">(</span><span class="nx">inputValue</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I've never used the second argument of parseInt(), as I don't really understand what a radix is. However, AirBnb recommends specifying the radix in order to reduce possible errors. From what I can glean, the radix is basically the key for how JavaScript should interpret the string. In most cases, it looks like 10 is the radix you want to use. The Mozilla dev guide has a good example of why specifiying the radix helps to reduce errors. For example, the following lines all evaluate to 15;</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nb">parseInt</span><span class="p">(</span><span class="s2">&quot;15*3&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'><span class="nb">parseInt</span><span class="p">(</span><span class="s2">&quot;15e2&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'><span class="nb">parseInt</span><span class="p">(</span><span class="s2">&quot;15px&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This allows you to pass strings with non-numeric characters without throwing an error.</p>
+
+
+
+
+<p>For typecasting boolean values, the guide recommends using Boolean() and !!. So if you want a variable that stores the truth value of another variable you can simply write:</p>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// good</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">hasAge</span> <span class="o">=</span> <span class="nb">Boolean</span><span class="p">(</span><span class="nx">age</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// good</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">hasAge</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">age</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<h4>Naming Conventions</h4>
+
+
+<p>In lab review, we briefly discussed ways to store this as a local variable and "that" and "self" were mentioned as possibilties. AirBnb advises against this practices, and instead recommends name the local variable <code>_this</code>. I prefer this method because it reduces ambiguity and the underscore denotes that it acts like a private property.</p>
+
+
+
+
+<h4>Constructors</h4>
+
+
+<p>
+  In order to design objects that can use method chains, AirBnb recommends that object methods return <code>this</code>. This is helpful because you can only chain methods on the object itself.
+</p>
+
+
+
+
+<h4>Conclusion</h4>
+
+
+<p>Reading AirBnb's JavaScript style guide definitely helped me ease some of my anxiety about the language. I wish some of their rules were explained, but overall it's quite informative. My biggest takeaway is that even though JavaScript's scope is weird, you can implement some basic conventions to avoid unforeseen errors down the road. I would definitely recommend new JavaScripters to take a look at the guide, as I personally plan on keeping it bookmarked to so I can rely on it later. The end of the article also has a ton of awesome links for further reading, including other JavaScript style guides. </p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kurt Vonnegut and Software Design]]></title>
+    <link href="http://apradhn.github.io/blog/2015/07/07/kurt-vonnegut-and-software-design/"/>
+    <updated>2015-07-07T01:00:31-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/07/07/kurt-vonnegut-and-software-design</id>
+    <content type="html"><![CDATA[<p>As an English major, I'm always trying to draw parallels between software design and literary criticism. Additionally, studying code everyday a Flatiron has pushed me to relate more abstract concepts to software design. Spurred by a reddit post about Kurt Vonnegut's "8 Basics of Creative Writing", I couldn't help but draw parallels between Vonnegut's rules and patterns of good software design. Kurt Vonnegut is a good writer to take software design inspiration from because his writing reflects a spare, concise style devoid of ornamentation. Addtionally, I've started reading <strong>Practical Object-Oriented Design in Ruby</strong> which discusses what it means for a software design pattern to be "good". What follows below is my best attempt to map Vonnegut's principles of writing to principles of good software design.</p>
+
+
+<ol>
+  <li><strong>Use the time of a total stranger in such a way that he or she will not feel the time was wasted</strong></li>
+  <br>
+  <p>To me, this rule says that no line of code of should be wasted. For example, does your method need to store local data, if it's purpose is to return that same data? All methods in ruby return the statement executed on the last line, so you do not always need to store data to a local variable in order to return it. If you do store data to a local variable, ensure that you do so for a reason. Otherwise, needlessly storing local data makes your code harder to read and harder to maintain.</p>
+  <li><strong>Give the reader at least one character he or she can root for.</strong></li>
+  <br>
+  <p>Okay, this is going to be a stretch, but I feel like this rule relates to the Single Responsibility Principle. The Single Responsibility Principle states that every class should have responsibility over a single part of the functionality of provided by the software. Not only does SRP make reading code easier, but it helps improves software by segmenting processes of a software into singular action. If one process breaks, you can quickly see where the error is happening, instead of having to read through the code of your entire application. It seems to me that any given method should ideally interact with one piece of data.</p>
+  <li><strong>Every character should want something, even if it is only a glass of water</strong></li>
+  <br>
+  <p>To me, this means that every method must return something useful, even if it's nil. The true potential of Object-Oriented Design only becomes unleashed if you assume that all methods of all classes return something to other objects. Even seemingly unimportant values like nil are important to return, because they tell us valuable information about the receiver. Returning nil is essential when our receiver is not compatible with the method called upon it, otherwise we may not catch the error until it pops up farther down pipeline.</p>
+  <li><strong>Every sentence must do one of two things--reveal character or advance action</strong></li>
+  <br>
+  <p>
+    This is the writing rule I saw on Reddit that prompted this post. This rule reinforces that there should be no unnecessary line of code, i.e. Do Not Repeat Yourself. The best code is code that can be built upon by future developers, for whatever they want to use your code for. Therefore, your code is actually telling a story to both the compiler and the human reading it. Every class must have a purpose for existing, and every method must have a necessary impact on the user experience. Anytime you write a method, you must ask yourself why must this be an instance method or class method? If more than one class share the same method, it's almost always a good idea to place it inside a module. Anyone reading your code will assume that you wrote everything for a particular reason, so you should think about how unused or unnecessary code obsfuscates meaning. Additionally, I feel that naming conventions for variables are just as important. Would the Great Gatsby have been as moving a novel if it were named the Satisfactory Gatsby? If i see a local variable in your code, the best way i can infer its purpose is from its name.
+  </p>
+  <li><strong>Start as Close to the End as Possible</strong></li>
+  <br>
+  <p>Agile Software Development is a collection of software development practices developed by Rubyists to enhance software deisgn patterns and productivity that has since been adopted by the tech-world at large. The first principle of Agile stresses delivering customer satisfaction through iterative development. What this means is that you should build your software bit by bit, developing the next most observable unit of progress. Our labs have a fairly straightforward linear progression, but in the real world, you cannot fathom what direction your software will grow into. By building an application incrementally, you get an organic sense of the how the final product should look and feel to the end-user, and it's easier for you diagnose and fix issues.</p>
+  <li><strong>Be a sadist. No Matter how sweet and innocent your leading characters, make awful things happen to them--in order to that the reader may see what they are made of.</strong></li>
+  <br>
+  <p>Okay, this is going to be another stretch. Write your classes with confidence. Write your classes in such a way that that they can smash into each other in unpredictable ways and yet yield no errors. Classes that are written in a flexible manner encourage experimentation, and thus encourage more creative software. Be willing to shift the focus of your application from one class to another, as the occaision sees fit.</p>
+  <li><strong>Write to please just one person. If you open a window and make love to the world, so to speak, your story will get pneumonia</strong></li>
+  <br>
+  <p>Write code that solves immediate problems. Do not write code that might possibly solve problems that do not exist yet. Code that is written to solve problems that does not exist discourages experimentation. Refactor your code for the problems that immediately present it.</p>
+  <li><strong>Give your readers as much information as possible as soon as possible. To heck with suspense. Readers should have such complete understanding of what is going on, where and why, that they could finish the story themselves, should cockaroaches eat the last few pages.</strong></li>
+  <br>
+  <p>When I read this rule, the first thing that leaps to mind is "Convention Over Configuration", one of the guiding principles behind Ruby on Rails. Your classes should have an interface that is easy for another developer to play around with. There's actually quite a bit of power behind this statement. Convention is like an implicit language between the lines of code that is readable only by humans. Computers do not require CRUD operations. We implement CRUD operations in software design because it is a familiar heurisitic for the most common interactions users have with data. Much of magic syntactical sugar of rails comes from this idea that there is a conventional way of building the basic elements of a web application. When developers share this understanding, it empowers us all to build bigger and more beautiful things, instead of wasting time explaining ourselves.</p>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Lessons in Software Design From Super Metroid]]></title>
+    <link href="http://apradhn.github.io/blog/2015/06/22/user-experience-lessons-from-metroid-prime/"/>
+    <updated>2015-06-22T00:18:35-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/06/22/user-experience-lessons-from-metroid-prime</id>
+    <content type="html"><![CDATA[<p>Over the past few days at Flatiron, I&rsquo;ve though a lot about how the video games I played as a kid has informed the way I think about designing software. Each week we&rsquo;ve been introduced to a new concept, from loops, to object oriented design to databases, and it helped to digest those concepts by thinking about those concepts in in the form of video games. However, I think some older video still have a few lessons to teach to modern software design. In particular, Metroid Prime came to mind.</p>
+
+<p>I grew up with a Sega Genesis so only recently have I been able to play some of the classic Super Nintendo games, particularly the games produced in-house by Nintendo. Games like Earthbound and Super Metroid struck me for their immersive user experiences. Thanks to Apple and Google, the average consumer has high standards for user experience compared to software products of the 80s and 90s. From my personal experience, using a computer in the 90s felt like a chore, like I was using something designed primarily to make spreadsheets. But despite the limited technology of the time, Nintendo was able to craft delightful software that could sustain your attention span for hours.</p>
+
+<p>Of all the games I&rsquo;ve played recently however, Metroid Prime stood out as a game with exceptional trust in the user&rsquo;s ability to navigate a piece of software. For that reason, I wanted to spend some time thinking about what lessons we could learn from it to apply to software design. Caveat: I still haven&rsquo;t beaten this game, and it&rsquo;s kind of insane they expected a child to beat this thing without looking for help on the internet.</p>
+
+<p>&lt;<img src="http://static.giantbomb.com/uploads/original/0/2627/575576-metroid_map1.jpg" alt=""></p>
+
+<h2>Separation of Concerns</h2>
+
+<p>Super Metroid puts you in control of an interplanetary bounty hunter, but little of it actually involves shooting stuff. Most of the time you guide Samus through the caverns of alien planet looking for new weapons or a boss battle. For a game that mostly involves running around, keeping the player&rsquo;s position in perspective poses a huge design challenge. Nintendo solves this problem by giving each of the five or so zones a unique look and feel. Moreover, each room of the game has a unique architecture. This is especially important for a game like Metroid Prime, that relies heaviy on exploration an puzzle solving. One of the factors that makes Metroid Prime a class is that there is no wasted pixel. There is no obstacle thoughtlessly placed, no ledge or secret passage way randomly programmed. It&rsquo;s easy to get lost in Metroid Prime, but not impossible to find your way out.</p>
+
+<p><img src="http://resource.mmgn.com/Games/Wii/large/Super-Metroid-5.jpg" alt=""></p>
+
+<h2>Domain Modeling</h2>
+
+<p>Solving puzzles in Super Metroid involves some variation on shooting or blowing things up. While this doesn&rsquo;t resemble a specific real-world analog, it does provide a meaningful design language. In this case, Nintendo exploits the very basic expectation between action and reaction. Very early on, you learn that Samus has to shoot doors with her blaster in order for them to open. Then you find out that green doors don&rsquo;t open when you shoot them. Expectation: you need to shoot them with something else. Eventually you find missles that do such a job. Later you find blocks engraved with symbols similar to the bombs you can drop. No surprise, you can blow them up with your bombs. Every interaction with the environment in Metroid Prime is meticulously planned. The lesson here is to provide meaningful feedback to every user interaction in your design. Don&rsquo;t mislead the user with flashy animations, make a deliberate choice for every possible way a user can interact with your product.</p>
+
+<p><img src="http://199.101.98.242/media/images/35792-Super_Metroid_(Europe)_(En,Fr,De)-10.jpg" alt=""></p>
+
+<h2>Know Thy User</h2>
+
+<p>The big secret about Super Metroid is that it gets easier the more you play it. It&rsquo;s never as hard as when you first step outside the spaceship, nary a super bomb. Over time you accumulate weapons, and master the environment, learning the ins and outs of the game. It&rsquo;s not really a secret, as pretty much any game that implements character development uses this pattern, from Final Fantasy to Arkham City. The trick is balancing how you empower the user. Super Metroid draws the problem-solvers with a sci-fi leaning. They reward intelligence by giving Samus bigger and better weapons, and health bonuses. The boss battles are noteworthy too. Too many games of this era punish the user for simply getting to the end. But each boss in Super Metroid behaves with a clear pattern. Additionally, Super Metroid grants you just enough health points, and places save points close by, to give the user more opportunities to experiment with different strategies. Fighting the bosses in Super Metroid feels like learning, where other boss battles of the era simply reward fast reflexes, luck, and what pixel you happen to be standing on.Empower them too quickly, and they grow bored. Empower them too slow, and you lose their attention. Games like Temple Run and Flappy Bird may seem dumb to many, but they remain immensely popular because each time you fail, you feel that it was your fault.</p>
+
+<h2>Conclusion</h2>
+
+<p>The lesson for non-game apps is that you need to respect the intelligence and the attention span of your audience. Do not overload them with an abundance of choices to show off the nifty features of your app. Create a story that guides their eyeball to the necessary info. If you have a lot of features, make the user feel like they are discovering the app themselves. If your app is not a video game, no one is using your app because it&rsquo;s pretty, they want to get something out of it. Whether it&rsquo;s Google Maps, or Tinder the design of user experience works because they have an intimate understanding of their user base. To spec buffs, these details may seem unimportant, but its the small details that make that make software distinguish itself from copycats.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Fun With Enumerables]]></title>
+    <link href="http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables/"/>
+    <updated>2015-06-09T20:59:28-04:00</updated>
+    <id>http://apradhn.github.io/blog/2015/06/09/fun-with-enumerables</id>
+    <content type="html"><![CDATA[<p>Over the last few days I've started experimenting with Enumerables. Nearly every lab required iterating through an array or hash in order to crunch some kind of data, so it made sense to use to utilize Ruby's built-in methods for Enumerble rather than push values to empty array inside an <code>#each</code> loop.</p>
+
+
+
+
+<p>For example, the first function for holiday.rb of the Apples and Holidays lab requires you to add the supply argument to the each of the winter holidays. To solve this, I looped through the winter hash of the holiday hash, and pushed the new supply to the end of each supply array. Lastly, I entered holiday_hash as the last line of the method so that it would return the updated hash to the program, like so:</p>
+
+
+<p><code>
+holiday_hash[:winter].each do |holiday, supplies|
+  supplies &lt;&lt; supply
+end
+holiday_hash
+</code></p>
+
+<p> <p>Since I was returning a hash with identical keys, I realized I could shorten the method by using <code>#collect,</code> like so:</p></p>
+
+<p><code>
+holiday_hash[:winter].collect {|holiday, supplies| supplies &lt;&lt; supply }
+</code></p>
+
+<p>Last week in the iteration lecture, Avi said something like "Every time you want a return a new array that is identical in size to the array you are iterating through, you probably want to use #collect". Since then I've been trying to replace unnecessary #each loops with #collect and in the process found out about some pretty useful enumerables to quickly return data from an array or hash. I learned that #find, #any?, and #select are powerful enumerables for completing some of the most common processes you want to do with an array or hash. So I wanted to spend some time exploring the rest of the Enumerable catalog to see what else could help me get data from an array/hash</p>
+
+
+
+
+<h3>#count</h3>
+
+
+
+
+<p>Not all enumerables return an array/hash. They can also return boolean values, and in the case of <code>#count</code>, a single number. <code>#count</code> returns a number equal to the amount of times the expression in the block evaluates to true. For example, how many times "raccoon" appears in an array of animals. At least 2 or 3 of the labs required us to get a count of how many times an element recurred in array or hash. This is how you would simulate #count using <code>#each</code>: </p>
+
+
+<p><code>
+animals = [&ldquo;fox&rdquo;, &ldquo;swan&rdquo;, &ldquo;raccoon&rdquo;, &ldquo;turtle&rdquo;, &ldquo;iguana&rdquo;, &ldquo;raccoon&rdquo;]<br>
+count = 0<br>
+animals.each do |animal|<br>
+&nbsp;&nbsp;if animal == &ldquo;raccoon&rdquo;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>
+&nbsp;&nbsp;end<br>
+end<br>
+count<br>
+</code></p>
+
+<p><code>#count</code> accomplishes the same logic in a single line:
+<br><code>animals.count{|animal| animal == &ldquo;raccoon&rdquo;}</code></p>
+
+<h3>#none?</h3>
+
+
+<p>Sometimes you just want to make sure that a value doesn&rsquo;t exist in your array/hash</p>
+
+<p><code>
+animals = {<br>
+&nbsp;&nbsp;fox: {class: &ldquo;mammalia&rdquo;}, <br>
+&nbsp;&nbsp;lobster: {class: &ldquo;crustacea&rdquo;}, <br>
+&nbsp;&nbsp;eagle: {class: &ldquo;aves&rdquo;}, <br>
+&nbsp;&nbsp;toad: {class: &ldquo;amphibia&rdquo;}}<br>
+<br>
+animals.none?{|animal, properties| properties[:class] == &ldquo;reptilia&rdquo;} <br> #=> true
+ </code></p>
+
+<p><code>#none</code> returns true because no animal has a class of repitilia</p>
+
+
+
+
+<h3>#one?</h3>
+
+
+
+
+<p><code>#one?</code> is a strange enumerator that does exactly what it sounds like it does: returns true if only one expression in the block evaluates to true</p>
+
+
+<p><code>
+animals.one?{|animal, properties| properties[:class] == &ldquo;aves&rdquo;} #=> true
+</code></p>
+
+<h3>#partition</h3>
+
+
+<p><code>#partition</code> is even stranger, because it returns two arrays, one for which the expression in the block evaluates to true, and the other for false. Say I have an arrays of dinosaur hashes, I can use partition to split it into an array of Jurassic and Cretaceous dinosaurs: </p>
+
+
+<p><code>
+dinosaurs = [<br>
+&nbsp;&nbsp;{name: &ldquo;Tyrannosaurus&rdquo;, era: &ldquo;Cretaceous&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Velociraptor&rdquo;, era: &ldquo;Cretaceous&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Pterodactylus&rdquo;, era: &ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Brachiosaurus&rdquo;, era: &ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Triceratops&rdquo;, era: &ldquo;Cretaceous&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Stegasaurus&rdquo;, era: &ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{name: &ldquo;Dilophosaurus&rdquo;, era: &ldquo;Jurassic&rdquo;}<br>
+]<br>
+<br>
+dinosaurs.partition{|dino, properties| properties[:era] == &ldquo;Jurassic&rdquo;}<br> #=><br/>
+[<br>
+&nbsp;&nbsp;[{:name=>&ldquo;Pterodactylus&rdquo;, :era=>&ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Brachiosaurus&rdquo;, :era=>&ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Stegasaurus&rdquo;, :era=>&ldquo;Jurassic&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Dilophosaurus&rdquo;, :era=>&ldquo;Jurassic&rdquo;}],<br>
+<br>
+&nbsp;&nbsp;[{:name=>&ldquo;Tyrannosaurus&rdquo;, :era=>&ldquo;Cretaceous&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Velociraptor&rdquo;, :era=>&ldquo;Cretaceous&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Triceratops&rdquo;, :era=>&ldquo;Cretaceous&rdquo;}]<br>
+]</code></p>
+
+<h3>#find_all</h3>
+
+
+
+
+<p><code>#find_all</code> is kind of like <code>#find</code>, except it returns an array containing of all the elements of a collection for which the expression in the block evaluates to true. This is handy in situations where you need to grab all the values from a list that match a specific value. In the following example, I use <code>#find_all</code> to get a list of all the kaiju that first premiered between 1965 and 1975:</p>
+
+
+<p><code>
+kaiju = [<br>
+&nbsp;&nbsp;{name: &ldquo;Godzilla&rdquo;, year: 1954},<br>
+&nbsp;&nbsp;{name: &ldquo;Anguiris&rdquo;, year: 1955},<br>
+&nbsp;&nbsp;{name: &ldquo;Rodan&rdquo;, year: 1956},<br>
+&nbsp;&nbsp;{name: &ldquo;Mothra&rdquo;, year: 1961},<br>
+&nbsp;&nbsp;{name: &ldquo;King Ghidorah&rdquo;, year: 1964},<br>
+&nbsp;&nbsp;{name: &ldquo;Gigan&rdquo;, year: 1972},<br>
+&nbsp;&nbsp;{name: &ldquo;Mothra&rdquo;, year: 1961},<br>
+&nbsp;&nbsp;{name: &ldquo;Mechagodzilla&rdquo;, year: 1974},<br>
+&nbsp;&nbsp;{name: &ldquo;Destoroyah&rdquo;, year: 1995},<br>
+&nbsp;&nbsp;{name: &ldquo;Biollante&rdquo;, year: 1989},<br>
+&nbsp;&nbsp;{name: &ldquo;Gezora&rdquo;, year: 1971}<br>
+]<br>
+kaiju.find_all {|k| k[:year] > 1965 &amp;&amp; k[:year] &lt; 1975 } #=> [<br>
+&nbsp;&nbsp;{:name=>&ldquo;Gigan&rdquo;, :year=>1972}, <br>
+&nbsp;&nbsp;{:name=>&ldquo;Mechagodzilla&rdquo;, :year=>1974}, <br>
+&nbsp;&nbsp;{:name=>&ldquo;Gezora&rdquo;, :year=>1971}<br>]
+</code></p>
+
+<h3>#group_by</h3>
+
+
+
+
+<p><code>#group_by</code> is a super powerful enumerable that allows you to reconstruct a collection based on the value in the block. when you use group_by on a collection, it will return a hash with keys named after the value in the block. I imagine that group_by is useful when you have an array or hashes with recurring values. For example, you can reorder an array of hashes by one of its keys: </p>
+
+
+<p><code>
+games = [<br>
+{name: &ldquo;Super Metroid&rdquo;, console: &ldquo;Super Nintendo&rdquo;},<br>
+{name: &ldquo;Toejam and Earl&rdquo;, console: &ldquo;Sega Genesis&rdquo;},<br>
+{name: &ldquo;Earthbound&rdquo;, console: &ldquo;Super Nintendo&rdquo;},<br>
+{name: &ldquo;Michael Jackson&rsquo;s Moonwalker&rdquo;, console: &ldquo;Sega Genesis&rdquo;},<br>
+{name: &ldquo;PaRappa The Rapper&rdquo;, console: &ldquo;Playstation&rdquo;},<br>
+{name: &ldquo;Pokémon Snap&rdquo;, console: &ldquo;Nintendo 64&rdquo;},<br>
+{name: &ldquo;Tony Hawk&rsquo;s Pro Skater&rdquo;, console: &ldquo;Playstation&rdquo;}<br>
+{name: &ldquo;Goldeneye&rdquo;, console: &ldquo;Nintendo 64&rdquo;}<br>
+]
+<br>
+<br>
+games.group_by{|game| game[:console]}
+</code></p>
+
+<p>returns:
+<br>
+<code>
+ {&ldquo;Super Nintendo&rdquo;=>[<br>
+ &nbsp;&nbsp;{:name=>&ldquo;Super Metroid&rdquo;, :console=>&ldquo;Super Nintendo&rdquo;},<br>
+ &nbsp;&nbsp;{:name=>&ldquo;Earthbound&rdquo;, :console=>&ldquo;Super Nintendo&rdquo;}<br>
+ ], <br>
+ &ldquo;Sega Genesis&rdquo;=>[<br>
+ &nbsp;&nbsp;{:name=>&ldquo;Toejam and Earl&rdquo;, :console=>&ldquo;Sega Genesis&rdquo;},<br>
+ &nbsp;&nbsp;{:name=>&ldquo;Michael Jackson&rsquo;s Moonwalker&rdquo;, :console=>&ldquo;Sega Genesis&rdquo;}<br>
+ ],<br>
+&ldquo;Playstation&rdquo;=>[<br>
+&nbsp;&nbsp;{:name=>&ldquo;PaRappa The Rapper&rdquo;, :console=>&ldquo;Playstation&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Tony Hawk&rsquo;s Pro Skater&rdquo;, :console=>&ldquo;Playstation&rdquo;}],<br>
+&ldquo;Nintendo 64&rdquo;=>[<br>
+&nbsp;&nbsp;{:name=>&ldquo;Pokémon Snap&rdquo;, :console=>&ldquo;Nintendo 64&rdquo;},<br>
+&nbsp;&nbsp;{:name=>&ldquo;Goldeneye&rdquo;, :console=>&ldquo;Nintendo 64&rdquo;}<br>
+]}
+</code></p>
+
+<p>In conclusion, enumerables are powerful methods that allow you to extract the most likely data you want to get from an array or hash, if you know how to use them properly. Nearly all of them can be recreated with an #each loop, but enumerables can save numerous lines of code and consolidate the logic of your program. Enumerables seem like a shortcut, but you can end up in a lot of trouble if you don&rsquo;t know exactly what you&rsquo;re using them for. I&rsquo;m glad we reconstructed some of the enumerables in class last week so that I could get a better understanding of the more exotic enumerables available in Ruby.</p>
+]]></content>
+  </entry>
+  
+</feed>
